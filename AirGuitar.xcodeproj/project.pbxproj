@@ -1,0 +1,589 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		039EC4474AE7BB8EA13BC073 /* BeatCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B170D848B3ABB9AFB01E52C /* BeatCapture.swift */; };
+		0676EFF797BE68DF6481F56A /* RhythmChallengePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C433613C93B6A0994BA57D9 /* RhythmChallengePage.swift */; };
+		0E04E69B38C1052D3560495D /* Demo-C-Am-F-G-96bpm.wav in Resources */ = {isa = PBXBuildFile; fileRef = CF86A1FE6448AEC1D85D0FAE /* Demo-C-Am-F-G-96bpm.wav */; };
+		1633A819EF45CBD2548386CA /* PhoneLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 713473B8AB4BE5954FD71192 /* PhoneLibrary.swift */; };
+		194286D502B6D475D8B01D40 /* LocalHarmonyReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AA4BDF9B280235D228B97A /* LocalHarmonyReader.swift */; };
+		25D593EF478D111879F417FD /* PerformanceAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A96CB0146B11CAEC79206D6 /* PerformanceAudio.swift */; };
+		2850B30809BB0C1884612733 /* WatchContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DBF2A7E1713664F05D534E8 /* WatchContentView.swift */; };
+		309E2ABA5FE944142BFCABFC /* Demo-C-Am-F-G-96bpm.wav in Resources */ = {isa = PBXBuildFile; fileRef = CF86A1FE6448AEC1D85D0FAE /* Demo-C-Am-F-G-96bpm.wav */; };
+		478BC9598418A0140750944B /* WatchIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 4F6C0E59CD621FB09783E19E /* WatchIcon.icon */; };
+		4A5391ECE3AFAF38724BB552 /* BackingMaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB14A03E2332A759EDE49D6 /* BackingMaker.swift */; };
+		53B9547F3E48BA59CA7B7E62 /* SessionArt.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BD5768232A38A139C55E9345 /* SessionArt.xcassets */; };
+		5CCA4C0D8FD9C447CEF2D8ED /* AirGuitarWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D03184BC06864142C4C7E00 /* AirGuitarWatchApp.swift */; };
+		6B171BAE04B19DA1045CEF43 /* SongPreparation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6609849805061A2ED66C01BE /* SongPreparation.swift */; };
+		6C7007DE32C9D0BAA86D13F7 /* SessionArt.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BD5768232A38A139C55E9345 /* SessionArt.xcassets */; };
+		6C9EBD871CC03FEB7A2651BF /* SessionGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4A6FB5EDD2198CCEDA0FF2 /* SessionGlass.swift */; };
+		77D74D97E5B547F080E6DBBF /* PerformanceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F887603EA07915E47ACAE7D9 /* PerformanceModel.swift */; };
+		7BBE2140FED8EBF394FD8165 /* WristCalibration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 712AA841911CC5067E17F7E4 /* WristCalibration.swift */; };
+		7C207F17D094116778B6BF52 /* SessionGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4A6FB5EDD2198CCEDA0FF2 /* SessionGlass.swift */; };
+		7C6BA80FBD27C7E5CD1C30E3 /* RepeatingBackingExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F9399B26F3A15A04FE7E84 /* RepeatingBackingExtractor.swift */; };
+		8AA7A10664A99074AB56EF98 /* MotionDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2275893B64DFB9348C274BA6 /* MotionDriver.swift */; };
+		8D5F03A7E4F3261657233C34 /* LocalTrackArtwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BC828FF756E2D48323E3C4C /* LocalTrackArtwork.swift */; };
+		94A76AA748FEEA77675B9E34 /* AirGuitarCore in Frameworks */ = {isa = PBXBuildFile; productRef = 304CB63EBD840DEC2D32AE3F /* AirGuitarCore */; };
+		A170C75200C6C9CFCED31CA0 /* AirGuitarPhoneApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1458616BC69AECD0BD789D8F /* AirGuitarPhoneApp.swift */; };
+		A3DB3E134B41F9550AFF0B16 /* RhythmRound.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA7F8F5606B7D0F35A0F7A /* RhythmRound.swift */; };
+		AC6C09FFCF29116C9F6A6927 /* PhoneLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31F0C4137031A4E407D63D57 /* PhoneLibraryView.swift */; };
+		B8C07B2526FE488675A8BBFE /* PhoneIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 798AA713BDB9ADBF1204A2BB /* PhoneIcon.icon */; };
+		E0BDDF40F6988CF9D88A9F86 /* WatchSongLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90E3F2125B3EECE47CB1CAFF /* WatchSongLibrary.swift */; };
+		E682567CE3701F328C2E20A0 /* AirGuitarWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C9EDAF02E300ECC7E05DD7E7 /* AirGuitarWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		ECE6E068E58A0BE811E9A36F /* LocalTrackArtwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BC828FF756E2D48323E3C4C /* LocalTrackArtwork.swift */; };
+		F126521D1AD5730B23FD34D8 /* SongPreparation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6609849805061A2ED66C01BE /* SongPreparation.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		3457E0C5367DD8E32BB78645 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D8237546043B2DB5DEEB900C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9EB5E9F7525F668A127A2410;
+			remoteInfo = AirGuitarWatch;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		CB784D62B237BFE27728B2D5 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				E682567CE3701F328C2E20A0 /* AirGuitarWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1458616BC69AECD0BD789D8F /* AirGuitarPhoneApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirGuitarPhoneApp.swift; sourceTree = "<group>"; };
+		1BC828FF756E2D48323E3C4C /* LocalTrackArtwork.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalTrackArtwork.swift; sourceTree = "<group>"; };
+		2275893B64DFB9348C274BA6 /* MotionDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionDriver.swift; sourceTree = "<group>"; };
+		2C433613C93B6A0994BA57D9 /* RhythmChallengePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhythmChallengePage.swift; sourceTree = "<group>"; };
+		31F0C4137031A4E407D63D57 /* PhoneLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneLibraryView.swift; sourceTree = "<group>"; };
+		34F9399B26F3A15A04FE7E84 /* RepeatingBackingExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatingBackingExtractor.swift; sourceTree = "<group>"; };
+		3A96CB0146B11CAEC79206D6 /* PerformanceAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceAudio.swift; sourceTree = "<group>"; };
+		4D03184BC06864142C4C7E00 /* AirGuitarWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirGuitarWatchApp.swift; sourceTree = "<group>"; };
+		4DBF2A7E1713664F05D534E8 /* WatchContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchContentView.swift; sourceTree = "<group>"; };
+		4F6C0E59CD621FB09783E19E /* WatchIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = WatchIcon.icon; sourceTree = "<group>"; };
+		58AA4BDF9B280235D228B97A /* LocalHarmonyReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalHarmonyReader.swift; sourceTree = "<group>"; };
+		6609849805061A2ED66C01BE /* SongPreparation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongPreparation.swift; sourceTree = "<group>"; };
+		712AA841911CC5067E17F7E4 /* WristCalibration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WristCalibration.swift; sourceTree = "<group>"; };
+		713473B8AB4BE5954FD71192 /* PhoneLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneLibrary.swift; sourceTree = "<group>"; };
+		798AA713BDB9ADBF1204A2BB /* PhoneIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = PhoneIcon.icon; sourceTree = "<group>"; };
+		7D4A6FB5EDD2198CCEDA0FF2 /* SessionGlass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionGlass.swift; sourceTree = "<group>"; };
+		7F2AB3316D8C1DB027EF6315 /* Core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Core; path = Core; sourceTree = SOURCE_ROOT; };
+		8B170D848B3ABB9AFB01E52C /* BeatCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeatCapture.swift; sourceTree = "<group>"; };
+		90E3F2125B3EECE47CB1CAFF /* WatchSongLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSongLibrary.swift; sourceTree = "<group>"; };
+		AAAA7F8F5606B7D0F35A0F7A /* RhythmRound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhythmRound.swift; sourceTree = "<group>"; };
+		BBB14A03E2332A759EDE49D6 /* BackingMaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackingMaker.swift; sourceTree = "<group>"; };
+		BD5768232A38A139C55E9345 /* SessionArt.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = SessionArt.xcassets; sourceTree = "<group>"; };
+		C9EDAF02E300ECC7E05DD7E7 /* AirGuitarWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AirGuitarWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CF86A1FE6448AEC1D85D0FAE /* Demo-C-Am-F-G-96bpm.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "Demo-C-Am-F-G-96bpm.wav"; sourceTree = "<group>"; };
+		D2CFC9762A8C2DD34F5C1F62 /* AirGuitar.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AirGuitar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F887603EA07915E47ACAE7D9 /* PerformanceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceModel.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DA349B40D941399C79AA6E44 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				94A76AA748FEEA77675B9E34 /* AirGuitarCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		079E5A8408EDA750FDED40C9 /* Samples */ = {
+			isa = PBXGroup;
+			children = (
+				CF86A1FE6448AEC1D85D0FAE /* Demo-C-Am-F-G-96bpm.wav */,
+			);
+			path = Samples;
+			sourceTree = "<group>";
+		};
+		15894643AE8662E65A294918 = {
+			isa = PBXGroup;
+			children = (
+				9C8B55A1E559BC98813D2AB7 /* Design */,
+				3AC21B7E2288D074EA898C17 /* iOS */,
+				F6B94CFB86A14C4AFE6E16F9 /* Packages */,
+				079E5A8408EDA750FDED40C9 /* Samples */,
+				7A0C6B86BE1FDB9CBFDB6751 /* Shared */,
+				CBE53FE50CA6D9B119B5300C /* Watch */,
+				7E04AA2D71CCBEBE50090199 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		3AC21B7E2288D074EA898C17 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				1458616BC69AECD0BD789D8F /* AirGuitarPhoneApp.swift */,
+				BBB14A03E2332A759EDE49D6 /* BackingMaker.swift */,
+				713473B8AB4BE5954FD71192 /* PhoneLibrary.swift */,
+				31F0C4137031A4E407D63D57 /* PhoneLibraryView.swift */,
+				34F9399B26F3A15A04FE7E84 /* RepeatingBackingExtractor.swift */,
+			);
+			path = iOS;
+			sourceTree = "<group>";
+		};
+		7A0C6B86BE1FDB9CBFDB6751 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				1BC828FF756E2D48323E3C4C /* LocalTrackArtwork.swift */,
+				7D4A6FB5EDD2198CCEDA0FF2 /* SessionGlass.swift */,
+				6609849805061A2ED66C01BE /* SongPreparation.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		7E04AA2D71CCBEBE50090199 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D2CFC9762A8C2DD34F5C1F62 /* AirGuitar.app */,
+				C9EDAF02E300ECC7E05DD7E7 /* AirGuitarWatch.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9C8B55A1E559BC98813D2AB7 /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				798AA713BDB9ADBF1204A2BB /* PhoneIcon.icon */,
+				BD5768232A38A139C55E9345 /* SessionArt.xcassets */,
+				4F6C0E59CD621FB09783E19E /* WatchIcon.icon */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
+		CBE53FE50CA6D9B119B5300C /* Watch */ = {
+			isa = PBXGroup;
+			children = (
+				4D03184BC06864142C4C7E00 /* AirGuitarWatchApp.swift */,
+				8B170D848B3ABB9AFB01E52C /* BeatCapture.swift */,
+				58AA4BDF9B280235D228B97A /* LocalHarmonyReader.swift */,
+				2275893B64DFB9348C274BA6 /* MotionDriver.swift */,
+				3A96CB0146B11CAEC79206D6 /* PerformanceAudio.swift */,
+				F887603EA07915E47ACAE7D9 /* PerformanceModel.swift */,
+				2C433613C93B6A0994BA57D9 /* RhythmChallengePage.swift */,
+				AAAA7F8F5606B7D0F35A0F7A /* RhythmRound.swift */,
+				4DBF2A7E1713664F05D534E8 /* WatchContentView.swift */,
+				90E3F2125B3EECE47CB1CAFF /* WatchSongLibrary.swift */,
+				712AA841911CC5067E17F7E4 /* WristCalibration.swift */,
+			);
+			path = Watch;
+			sourceTree = "<group>";
+		};
+		F6B94CFB86A14C4AFE6E16F9 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				7F2AB3316D8C1DB027EF6315 /* Core */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		9AA589A47BB979F4FEE6DDC3 /* AirGuitarPhone */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B6179D9075A849F1378DF9AE /* Build configuration list for PBXNativeTarget "AirGuitarPhone" */;
+			buildPhases = (
+				1FAAE7C211EF4728FE90C538 /* Sources */,
+				F8B73163F37FA9154D10FC55 /* Resources */,
+				CB784D62B237BFE27728B2D5 /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3ABCA94C514B758638D34A50 /* PBXTargetDependency */,
+			);
+			name = AirGuitarPhone;
+			packageProductDependencies = (
+			);
+			productName = AirGuitarPhone;
+			productReference = D2CFC9762A8C2DD34F5C1F62 /* AirGuitar.app */;
+			productType = "com.apple.product-type.application";
+		};
+		9EB5E9F7525F668A127A2410 /* AirGuitarWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4DC027813BA27F936EAB9134 /* Build configuration list for PBXNativeTarget "AirGuitarWatch" */;
+			buildPhases = (
+				8E64B0E8DA3A1B6B5E940457 /* Sources */,
+				0968EF344F3DE20CFEA2BDB6 /* Resources */,
+				DA349B40D941399C79AA6E44 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AirGuitarWatch;
+			packageProductDependencies = (
+				304CB63EBD840DEC2D32AE3F /* AirGuitarCore */,
+			);
+			productName = AirGuitarWatch;
+			productReference = C9EDAF02E300ECC7E05DD7E7 /* AirGuitarWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D8237546043B2DB5DEEB900C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					9AA589A47BB979F4FEE6DDC3 = {
+						ProvisioningStyle = Automatic;
+					};
+					9EB5E9F7525F668A127A2410 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 19A79C8D1D81A692E9926603 /* Build configuration list for PBXProject "AirGuitar" */;
+			developmentRegion = "zh-Hans";
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				"zh-Hans",
+			);
+			mainGroup = 15894643AE8662E65A294918;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C0146F7EF2ADBBAC2CE86ECA /* XCLocalSwiftPackageReference "Core" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 7E04AA2D71CCBEBE50090199 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9AA589A47BB979F4FEE6DDC3 /* AirGuitarPhone */,
+				9EB5E9F7525F668A127A2410 /* AirGuitarWatch */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		0968EF344F3DE20CFEA2BDB6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0E04E69B38C1052D3560495D /* Demo-C-Am-F-G-96bpm.wav in Resources */,
+				6C7007DE32C9D0BAA86D13F7 /* SessionArt.xcassets in Resources */,
+				478BC9598418A0140750944B /* WatchIcon.icon in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F8B73163F37FA9154D10FC55 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				309E2ABA5FE944142BFCABFC /* Demo-C-Am-F-G-96bpm.wav in Resources */,
+				B8C07B2526FE488675A8BBFE /* PhoneIcon.icon in Resources */,
+				53B9547F3E48BA59CA7B7E62 /* SessionArt.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1FAAE7C211EF4728FE90C538 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A170C75200C6C9CFCED31CA0 /* AirGuitarPhoneApp.swift in Sources */,
+				4A5391ECE3AFAF38724BB552 /* BackingMaker.swift in Sources */,
+				ECE6E068E58A0BE811E9A36F /* LocalTrackArtwork.swift in Sources */,
+				1633A819EF45CBD2548386CA /* PhoneLibrary.swift in Sources */,
+				AC6C09FFCF29116C9F6A6927 /* PhoneLibraryView.swift in Sources */,
+				7C6BA80FBD27C7E5CD1C30E3 /* RepeatingBackingExtractor.swift in Sources */,
+				6C9EBD871CC03FEB7A2651BF /* SessionGlass.swift in Sources */,
+				F126521D1AD5730B23FD34D8 /* SongPreparation.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8E64B0E8DA3A1B6B5E940457 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5CCA4C0D8FD9C447CEF2D8ED /* AirGuitarWatchApp.swift in Sources */,
+				039EC4474AE7BB8EA13BC073 /* BeatCapture.swift in Sources */,
+				194286D502B6D475D8B01D40 /* LocalHarmonyReader.swift in Sources */,
+				8D5F03A7E4F3261657233C34 /* LocalTrackArtwork.swift in Sources */,
+				8AA7A10664A99074AB56EF98 /* MotionDriver.swift in Sources */,
+				25D593EF478D111879F417FD /* PerformanceAudio.swift in Sources */,
+				77D74D97E5B547F080E6DBBF /* PerformanceModel.swift in Sources */,
+				0676EFF797BE68DF6481F56A /* RhythmChallengePage.swift in Sources */,
+				A3DB3E134B41F9550AFF0B16 /* RhythmRound.swift in Sources */,
+				7C207F17D094116778B6BF52 /* SessionGlass.swift in Sources */,
+				6B171BAE04B19DA1045CEF43 /* SongPreparation.swift in Sources */,
+				2850B30809BB0C1884612733 /* WatchContentView.swift in Sources */,
+				E0BDDF40F6988CF9D88A9F86 /* WatchSongLibrary.swift in Sources */,
+				7BBE2140FED8EBF394FD8165 /* WristCalibration.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3ABCA94C514B758638D34A50 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9EB5E9F7525F668A127A2410 /* AirGuitarWatch */;
+			targetProxy = 3457E0C5367DD8E32BB78645 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		22971252281FEB7985A8B0F6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = PhoneIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Configuration/Phone-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(AIRGUITAR_BUNDLE_ID)";
+				PRODUCT_NAME = AirGuitar;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		267A1BC9AAF3833CA961CAFC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				AIRGUITAR_BUNDLE_ID = com.example.AirGuitar;
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Release;
+		};
+		45BAF95A8A9B0CE5B30A1FD2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				AIRGUITAR_BUNDLE_ID = com.example.AirGuitar;
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Debug;
+		};
+		8568C93431196507BE8EA180 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = WatchIcon;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Configuration/Watch-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(AIRGUITAR_BUNDLE_ID).watchkitapp";
+				PRODUCT_NAME = AirGuitarWatch;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
+		};
+		8EE73DA430CFBEAC2916502B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = PhoneIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Configuration/Phone-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(AIRGUITAR_BUNDLE_ID)";
+				PRODUCT_NAME = AirGuitar;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		EA7279A73687C129E24A7041 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = WatchIcon;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Configuration/Watch-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(AIRGUITAR_BUNDLE_ID).watchkitapp";
+				PRODUCT_NAME = AirGuitarWatch;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		19A79C8D1D81A692E9926603 /* Build configuration list for PBXProject "AirGuitar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				45BAF95A8A9B0CE5B30A1FD2 /* Debug */,
+				267A1BC9AAF3833CA961CAFC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		4DC027813BA27F936EAB9134 /* Build configuration list for PBXNativeTarget "AirGuitarWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8568C93431196507BE8EA180 /* Debug */,
+				EA7279A73687C129E24A7041 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B6179D9075A849F1378DF9AE /* Build configuration list for PBXNativeTarget "AirGuitarPhone" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8EE73DA430CFBEAC2916502B /* Debug */,
+				22971252281FEB7985A8B0F6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		C0146F7EF2ADBBAC2CE86ECA /* XCLocalSwiftPackageReference "Core" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Core;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		304CB63EBD840DEC2D32AE3F /* AirGuitarCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AirGuitarCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = D8237546043B2DB5DEEB900C /* Project object */;
+}

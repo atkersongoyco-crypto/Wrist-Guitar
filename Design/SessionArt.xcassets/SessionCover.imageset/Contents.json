@@ -1,0 +1,7 @@
+{
+  "images": [
+    { "filename": "session-cover.jpg", "idiom": "universal" }
+  ],
+  "info": { "author": "xcode", "version": 1 },
+  "properties": { "compression-type": "lossy", "template-rendering-intent": "original" }
+}

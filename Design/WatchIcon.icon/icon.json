@@ -1,0 +1,41 @@
+{
+  "fill": {
+    "automatic-gradient": "srgb:0.018,0.026,0.050,1.000"
+  },
+  "groups": [
+    {
+      "layers": [
+        {
+          "image-name": "GlassRim.svg",
+          "name": "断续折射外缘",
+          "glass": false
+        }
+      ],
+      "name": "黑玻璃",
+      "specular": false,
+      "shadow": {
+        "kind": "none",
+        "opacity": 0
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0
+      }
+    },
+    {
+      "layers": [
+        {
+          "image-name": "PorcelainGuitar.svg",
+          "name": "白瓷吉他"
+        }
+      ],
+      "name": "吉他"
+    }
+  ],
+  "supported-platforms": {
+    "circles": [
+      "watchOS"
+    ],
+    "squares": []
+  }
+}

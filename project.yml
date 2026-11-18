@@ -1,0 +1,104 @@
+name: AirGuitar
+options:
+  minimumXcodeGenVersion: 2.44.0
+  developmentLanguage: zh-Hans
+  xcodeVersion: "16.0"
+  deploymentTarget:
+    iOS: "18.0"
+    watchOS: "11.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    CODE_SIGN_STYLE: Automatic
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    AIRGUITAR_BUNDLE_ID: com.example.AirGuitar
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+packages:
+  AirGuitarCore:
+    path: Core
+targets:
+  AirGuitarPhone:
+    type: application
+    productName: AirGuitar
+    platform: iOS
+    sources:
+      - path: iOS
+      - path: Shared
+      - path: Design/PhoneIcon.icon
+        type: file
+        buildPhase: resources
+      - path: Design/SessionArt.xcassets
+        buildPhase: resources
+      - path: Samples/Demo-C-Am-F-G-96bpm.wav
+        buildPhase: resources
+    info:
+      path: Configuration/Phone-Info.plist
+      properties:
+        CFBundleDisplayName: AirGuitar
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSRequiresIPhoneOS: true
+        LSSupportsOpeningDocumentsInPlace: false
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Audio Accompaniment
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes:
+              - public.mp3
+              - public.mpeg-4-audio
+              - com.microsoft.waveform-audio
+              - public.aiff-audio
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+          UISceneConfigurations: {}
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(AIRGUITAR_BUNDLE_ID)
+        PRODUCT_NAME: AirGuitar
+        ASSETCATALOG_COMPILER_APPICON_NAME: PhoneIcon
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: NO
+    dependencies:
+      - target: AirGuitarWatch
+        embed: true
+    scheme:
+      gatherCoverageData: false
+  AirGuitarWatch:
+    type: application
+    platform: watchOS
+    sources:
+      - path: Watch
+      - path: Shared
+      - path: Design/SessionArt.xcassets
+        buildPhase: resources
+      - path: Samples/Demo-C-Am-F-G-96bpm.wav
+        buildPhase: resources
+      - path: Design/WatchIcon.icon
+        type: file
+        buildPhase: resources
+    info:
+      path: Configuration/Watch-Info.plist
+      properties:
+        CFBundleDisplayName: AirGuitar
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        WKApplication: true
+        WKCompanionAppBundleIdentifier: $(AIRGUITAR_BUNDLE_ID)
+        NSMotionUsageDescription: 读取手腕转动与加速度，用于校准个人挥幅、显示动作线，并在挥动时拨弦。
+        NSMicrophoneUsageDescription: 点按“听手机外放”时短暂聆听附近音乐，估算跟拍速度和拍点。
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(AIRGUITAR_BUNDLE_ID).watchkitapp
+        PRODUCT_NAME: AirGuitarWatch
+        ASSETCATALOG_COMPILER_APPICON_NAME: WatchIcon
+        TARGETED_DEVICE_FAMILY: "4"
+        GENERATE_INFOPLIST_FILE: NO
+    dependencies:
+      - package: AirGuitarCore
+        product: AirGuitarCore
+    scheme:
+      gatherCoverageData: false
