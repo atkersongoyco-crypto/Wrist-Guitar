@@ -12,9 +12,13 @@
 		0E04E69B38C1052D3560495D /* Demo-C-Am-F-G-96bpm.wav in Resources */ = {isa = PBXBuildFile; fileRef = CF86A1FE6448AEC1D85D0FAE /* Demo-C-Am-F-G-96bpm.wav */; };
 		1633A819EF45CBD2548386CA /* PhoneLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 713473B8AB4BE5954FD71192 /* PhoneLibrary.swift */; };
 		194286D502B6D475D8B01D40 /* LocalHarmonyReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AA4BDF9B280235D228B97A /* LocalHarmonyReader.swift */; };
+		1B6ECBD28B94E0B7C1A5C03F /* WatchTransferAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B78B61C39D922576321E5FD /* WatchTransferAudio.swift */; };
 		25D593EF478D111879F417FD /* PerformanceAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A96CB0146B11CAEC79206D6 /* PerformanceAudio.swift */; };
 		2850B30809BB0C1884612733 /* WatchContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DBF2A7E1713664F05D534E8 /* WatchContentView.swift */; };
+		2C5A671BE1ABA1A1A44EF31C /* RecordingPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFDD61E3DAB97755616175BE /* RecordingPlayer.swift */; };
 		309E2ABA5FE944142BFCABFC /* Demo-C-Am-F-G-96bpm.wav in Resources */ = {isa = PBXBuildFile; fileRef = CF86A1FE6448AEC1D85D0FAE /* Demo-C-Am-F-G-96bpm.wav */; };
+		36D7528217E3E73F25A5F74E /* TourStroke.wav in Resources */ = {isa = PBXBuildFile; fileRef = D6AF19465531D5257E396442 /* TourStroke.wav */; };
+		4276C399FB3129FF6C6CE1E2 /* RecordWatchFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25334001FFF7C666684E1511 /* RecordWatchFace.swift */; };
 		478BC9598418A0140750944B /* WatchIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 4F6C0E59CD621FB09783E19E /* WatchIcon.icon */; };
 		4A5391ECE3AFAF38724BB552 /* BackingMaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB14A03E2332A759EDE49D6 /* BackingMaker.swift */; };
 		53B9547F3E48BA59CA7B7E62 /* SessionArt.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BD5768232A38A139C55E9345 /* SessionArt.xcassets */; };
@@ -22,6 +26,7 @@
 		6B171BAE04B19DA1045CEF43 /* SongPreparation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6609849805061A2ED66C01BE /* SongPreparation.swift */; };
 		6C7007DE32C9D0BAA86D13F7 /* SessionArt.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BD5768232A38A139C55E9345 /* SessionArt.xcassets */; };
 		6C9EBD871CC03FEB7A2651BF /* SessionGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4A6FB5EDD2198CCEDA0FF2 /* SessionGlass.swift */; };
+		75C9278393E23D2C9327E745 /* Guitar in Resources */ = {isa = PBXBuildFile; fileRef = AA927C2CF5F90F2BDD7C8122 /* Guitar */; };
 		77D74D97E5B547F080E6DBBF /* PerformanceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F887603EA07915E47ACAE7D9 /* PerformanceModel.swift */; };
 		7BBE2140FED8EBF394FD8165 /* WristCalibration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 712AA841911CC5067E17F7E4 /* WristCalibration.swift */; };
 		7C207F17D094116778B6BF52 /* SessionGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D4A6FB5EDD2198CCEDA0FF2 /* SessionGlass.swift */; };
@@ -33,6 +38,8 @@
 		A3DB3E134B41F9550AFF0B16 /* RhythmRound.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA7F8F5606B7D0F35A0F7A /* RhythmRound.swift */; };
 		AC6C09FFCF29116C9F6A6927 /* PhoneLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31F0C4137031A4E407D63D57 /* PhoneLibraryView.swift */; };
 		B8C07B2526FE488675A8BBFE /* PhoneIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 798AA713BDB9ADBF1204A2BB /* PhoneIcon.icon */; };
+		BD74006CB9A8B55B89C3C08E /* SongPickVoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4639B8D204EA54AD51E5827 /* SongPickVoice.swift */; };
+		DFC55E7DCEAB0EB19240FE4F /* RecordPracticeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7AC4EEC8330740472006686 /* RecordPracticeCard.swift */; };
 		E0BDDF40F6988CF9D88A9F86 /* WatchSongLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90E3F2125B3EECE47CB1CAFF /* WatchSongLibrary.swift */; };
 		E682567CE3701F328C2E20A0 /* AirGuitarWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C9EDAF02E300ECC7E05DD7E7 /* AirGuitarWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		ECE6E068E58A0BE811E9A36F /* LocalTrackArtwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BC828FF756E2D48323E3C4C /* LocalTrackArtwork.swift */; };
@@ -67,6 +74,8 @@
 		1458616BC69AECD0BD789D8F /* AirGuitarPhoneApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirGuitarPhoneApp.swift; sourceTree = "<group>"; };
 		1BC828FF756E2D48323E3C4C /* LocalTrackArtwork.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalTrackArtwork.swift; sourceTree = "<group>"; };
 		2275893B64DFB9348C274BA6 /* MotionDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionDriver.swift; sourceTree = "<group>"; };
+		25334001FFF7C666684E1511 /* RecordWatchFace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordWatchFace.swift; sourceTree = "<group>"; };
+		2B78B61C39D922576321E5FD /* WatchTransferAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchTransferAudio.swift; sourceTree = "<group>"; };
 		2C433613C93B6A0994BA57D9 /* RhythmChallengePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhythmChallengePage.swift; sourceTree = "<group>"; };
 		31F0C4137031A4E407D63D57 /* PhoneLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneLibraryView.swift; sourceTree = "<group>"; };
 		34F9399B26F3A15A04FE7E84 /* RepeatingBackingExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatingBackingExtractor.swift; sourceTree = "<group>"; };
@@ -83,13 +92,18 @@
 		7F2AB3316D8C1DB027EF6315 /* Core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Core; path = Core; sourceTree = SOURCE_ROOT; };
 		8B170D848B3ABB9AFB01E52C /* BeatCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeatCapture.swift; sourceTree = "<group>"; };
 		90E3F2125B3EECE47CB1CAFF /* WatchSongLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSongLibrary.swift; sourceTree = "<group>"; };
+		AA927C2CF5F90F2BDD7C8122 /* Guitar */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Guitar; path = Samples/Guitar; sourceTree = SOURCE_ROOT; };
 		AAAA7F8F5606B7D0F35A0F7A /* RhythmRound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhythmRound.swift; sourceTree = "<group>"; };
+		B7AC4EEC8330740472006686 /* RecordPracticeCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordPracticeCard.swift; sourceTree = "<group>"; };
 		BBB14A03E2332A759EDE49D6 /* BackingMaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackingMaker.swift; sourceTree = "<group>"; };
 		BD5768232A38A139C55E9345 /* SessionArt.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = SessionArt.xcassets; sourceTree = "<group>"; };
 		C9EDAF02E300ECC7E05DD7E7 /* AirGuitarWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AirGuitarWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CF86A1FE6448AEC1D85D0FAE /* Demo-C-Am-F-G-96bpm.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "Demo-C-Am-F-G-96bpm.wav"; sourceTree = "<group>"; };
 		D2CFC9762A8C2DD34F5C1F62 /* AirGuitar.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AirGuitar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D6AF19465531D5257E396442 /* TourStroke.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = TourStroke.wav; sourceTree = "<group>"; };
+		F4639B8D204EA54AD51E5827 /* SongPickVoice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongPickVoice.swift; sourceTree = "<group>"; };
 		F887603EA07915E47ACAE7D9 /* PerformanceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceModel.swift; sourceTree = "<group>"; };
+		FFDD61E3DAB97755616175BE /* RecordingPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingPlayer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,6 +122,7 @@
 			isa = PBXGroup;
 			children = (
 				CF86A1FE6448AEC1D85D0FAE /* Demo-C-Am-F-G-96bpm.wav */,
+				D6AF19465531D5257E396442 /* TourStroke.wav */,
 			);
 			path = Samples;
 			sourceTree = "<group>";
@@ -115,6 +130,7 @@
 		15894643AE8662E65A294918 = {
 			isa = PBXGroup;
 			children = (
+				AA927C2CF5F90F2BDD7C8122 /* Guitar */,
 				9C8B55A1E559BC98813D2AB7 /* Design */,
 				3AC21B7E2288D074EA898C17 /* iOS */,
 				F6B94CFB86A14C4AFE6E16F9 /* Packages */,
@@ -132,7 +148,9 @@
 				BBB14A03E2332A759EDE49D6 /* BackingMaker.swift */,
 				713473B8AB4BE5954FD71192 /* PhoneLibrary.swift */,
 				31F0C4137031A4E407D63D57 /* PhoneLibraryView.swift */,
+				B7AC4EEC8330740472006686 /* RecordPracticeCard.swift */,
 				34F9399B26F3A15A04FE7E84 /* RepeatingBackingExtractor.swift */,
+				2B78B61C39D922576321E5FD /* WatchTransferAudio.swift */,
 			);
 			path = iOS;
 			sourceTree = "<group>";
@@ -175,8 +193,11 @@
 				2275893B64DFB9348C274BA6 /* MotionDriver.swift */,
 				3A96CB0146B11CAEC79206D6 /* PerformanceAudio.swift */,
 				F887603EA07915E47ACAE7D9 /* PerformanceModel.swift */,
+				FFDD61E3DAB97755616175BE /* RecordingPlayer.swift */,
+				25334001FFF7C666684E1511 /* RecordWatchFace.swift */,
 				2C433613C93B6A0994BA57D9 /* RhythmChallengePage.swift */,
 				AAAA7F8F5606B7D0F35A0F7A /* RhythmRound.swift */,
+				F4639B8D204EA54AD51E5827 /* SongPickVoice.swift */,
 				4DBF2A7E1713664F05D534E8 /* WatchContentView.swift */,
 				90E3F2125B3EECE47CB1CAFF /* WatchSongLibrary.swift */,
 				712AA841911CC5067E17F7E4 /* WristCalibration.swift */,
@@ -281,6 +302,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0E04E69B38C1052D3560495D /* Demo-C-Am-F-G-96bpm.wav in Resources */,
+				75C9278393E23D2C9327E745 /* Guitar in Resources */,
 				6C7007DE32C9D0BAA86D13F7 /* SessionArt.xcassets in Resources */,
 				478BC9598418A0140750944B /* WatchIcon.icon in Resources */,
 			);
@@ -293,6 +315,7 @@
 				309E2ABA5FE944142BFCABFC /* Demo-C-Am-F-G-96bpm.wav in Resources */,
 				B8C07B2526FE488675A8BBFE /* PhoneIcon.icon in Resources */,
 				53B9547F3E48BA59CA7B7E62 /* SessionArt.xcassets in Resources */,
+				36D7528217E3E73F25A5F74E /* TourStroke.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -308,9 +331,11 @@
 				ECE6E068E58A0BE811E9A36F /* LocalTrackArtwork.swift in Sources */,
 				1633A819EF45CBD2548386CA /* PhoneLibrary.swift in Sources */,
 				AC6C09FFCF29116C9F6A6927 /* PhoneLibraryView.swift in Sources */,
+				DFC55E7DCEAB0EB19240FE4F /* RecordPracticeCard.swift in Sources */,
 				7C6BA80FBD27C7E5CD1C30E3 /* RepeatingBackingExtractor.swift in Sources */,
 				6C9EBD871CC03FEB7A2651BF /* SessionGlass.swift in Sources */,
 				F126521D1AD5730B23FD34D8 /* SongPreparation.swift in Sources */,
+				1B6ECBD28B94E0B7C1A5C03F /* WatchTransferAudio.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -325,9 +350,12 @@
 				8AA7A10664A99074AB56EF98 /* MotionDriver.swift in Sources */,
 				25D593EF478D111879F417FD /* PerformanceAudio.swift in Sources */,
 				77D74D97E5B547F080E6DBBF /* PerformanceModel.swift in Sources */,
+				4276C399FB3129FF6C6CE1E2 /* RecordWatchFace.swift in Sources */,
+				2C5A671BE1ABA1A1A44EF31C /* RecordingPlayer.swift in Sources */,
 				0676EFF797BE68DF6481F56A /* RhythmChallengePage.swift in Sources */,
 				A3DB3E134B41F9550AFF0B16 /* RhythmRound.swift in Sources */,
 				7C207F17D094116778B6BF52 /* SessionGlass.swift in Sources */,
+				BD74006CB9A8B55B89C3C08E /* SongPickVoice.swift in Sources */,
 				6B171BAE04B19DA1045CEF43 /* SongPreparation.swift in Sources */,
 				2850B30809BB0C1884612733 /* WatchContentView.swift in Sources */,
 				E0BDDF40F6988CF9D88A9F86 /* WatchSongLibrary.swift in Sources */,
@@ -400,7 +428,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 20;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -414,7 +442,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.1.19;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -461,7 +489,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 20;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -481,7 +509,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.1.19;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

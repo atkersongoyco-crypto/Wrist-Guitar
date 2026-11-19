@@ -10,8 +10,8 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     CODE_SIGN_STYLE: Automatic
-    MARKETING_VERSION: "0.1.0"
-    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "0.1.19"
+    CURRENT_PROJECT_VERSION: "20"
     AIRGUITAR_BUNDLE_ID: com.example.AirGuitar
     ENABLE_USER_SCRIPT_SANDBOXING: YES
 packages:
@@ -32,10 +32,13 @@ targets:
         buildPhase: resources
       - path: Samples/Demo-C-Am-F-G-96bpm.wav
         buildPhase: resources
+      - path: Samples/TourStroke.wav
+        buildPhase: resources
     info:
       path: Configuration/Phone-Info.plist
       properties:
-        CFBundleDisplayName: AirGuitar
+        CFBundleDisplayName: Wrist Guitar
+        CFBundleName: Wrist Guitar
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSRequiresIPhoneOS: true
@@ -77,16 +80,23 @@ targets:
         buildPhase: resources
       - path: Samples/Demo-C-Am-F-G-96bpm.wav
         buildPhase: resources
+      - path: Samples/Guitar
+        type: folder
+        buildPhase: resources
       - path: Design/WatchIcon.icon
         type: file
         buildPhase: resources
     info:
       path: Configuration/Watch-Info.plist
       properties:
-        CFBundleDisplayName: AirGuitar
+        CFBundleDisplayName: Wrist Guitar
+        CFBundleName: Wrist Guitar
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         WKApplication: true
+        WKSupportsAlwaysOnDisplay: true
+        UIBackgroundModes:
+          - audio
         WKCompanionAppBundleIdentifier: $(AIRGUITAR_BUNDLE_ID)
         NSMotionUsageDescription: 读取手腕转动与加速度，用于校准个人挥幅、显示动作线，并在挥动时拨弦。
         NSMicrophoneUsageDescription: 点按“听手机外放”时短暂聆听附近音乐，估算跟拍速度和拍点。

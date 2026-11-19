@@ -18,7 +18,7 @@ struct SessionBackdrop: View {
                 .clipped()
                 .overlay(Color.black.opacity(subdued ? 0.78 : 0.48))
                 .overlay {
-                    LinearGradient(colors: [.black.opacity(0.15), .black.opacity(0.42), .black.opacity(0.92)],
+                    LinearGradient(colors: [SessionPalette.kleinBlue.opacity(subdued ? 0.12 : 0.24), .black.opacity(0.42), .black.opacity(0.92)],
                                    startPoint: .top, endPoint: .bottom)
                 }
         }
@@ -34,7 +34,7 @@ struct SessionPrimaryButtonStyle: ButtonStyle {
             .foregroundStyle(Color.black)
             .padding(.horizontal, 14).padding(.vertical, 11)
             .frame(maxWidth: .infinity, minHeight: 44)
-            .background(watchPearl.opacity(configuration.isPressed ? 0.75 : 1), in: Capsule())
+            .background(SessionPalette.sage.opacity(configuration.isPressed ? 0.75 : 1), in: Capsule())
     }
 }
 
@@ -85,14 +85,17 @@ struct WatchContentView: View {
     @EnvironmentObject private var round: RhythmRound
     @EnvironmentObject private var library: WatchSongLibrary
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.isLuminanceReduced) private var isLuminanceReduced
     @State private var page = 0
     @State private var choosingForChallenge = false
     @State private var presentedSheet: PlayerSheet?
+    @State private var feelOpenedFromSettings = false
     @State private var restoredSelection = false
     @State private var requestDuringSong: SongPreparation?
+    @AppStorage("WristGuitar.crownVolumeEnabled") private var crownVolumeEnabled = true
 
     private enum PlayerSheet: String, Identifiable {
-        case library, settings, calibration
+        case library, settings, feel, calibration
         var id: String { rawValue }
     }
 
@@ -122,17 +125,32 @@ struct WatchContentView: View {
     }
 
     var body: some View {
+        let wristDown = isLuminanceReduced && presentedSheet == nil
+        let canAdjustVolume = crownVolumeEnabled && scenePhase == .active
+            && !wristDown && presentedSheet == nil && model.error == nil
         TabView(selection: $page) {
-            PerformancePage(isFrontmost: page == 0 && presentedSheet == nil,
+            PerformancePage(isFrontmost: page == 0 && presentedSheet == nil && !wristDown && scenePhase == .active,
+                            showsCrownVolume: canAdjustVolume && page == 0 && model.isRunning,
                             chooseSong: { openLibrary(forChallenge: false) },
-                            settings: { presentedSheet = .settings }, challenge: { page = 1 }).tag(0)
+                            settings: { presentedSheet = .settings }, feel: { openFeel(fromSettings: false) },
+                            challenge: { page = 1 }).tag(0)
             RhythmChallengePage(isFrontmost: page == 1 && presentedSheet == nil,
+                                showsCrownVolume: canAdjustVolume && page == 1 &&
+                                    (round.phase == .countdown || round.phase == .playing),
                                 chooseSong: { openLibrary(forChallenge: true) },
                                 returnToPlayer: { page = 0 }, settings: { presentedSheet = .settings }).tag(1)
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
         .tint(watchPearl)
         .background(Color.black)
+        .opacity(wristDown ? 0 : 1)
+        .allowsHitTesting(!wristDown)
+        .accessibilityHidden(wristDown)
+        .overlay {
+            if wristDown {
+                WristDownPlayer(isChallenge: page == 1)
+            }
+        }
         .onAppear {
             guard !restoredSelection else { return }
             restoredSelection = true
@@ -165,12 +183,19 @@ struct WatchContentView: View {
                     presentedSheet = nil
                 })
             case .settings:
-                SettingsPage(calibrate: openCalibration)
+                SettingsPage(calibrate: openCalibration, editFeel: { openFeel(fromSettings: true) },
+                             crownVolumeEnabled: $crownVolumeEnabled)
+            case .feel:
+                RecordWatchFeelPanel(assisted: model.assisted, followsRecording: model.usesRecordingControls,
+                                     calibrated: model.calibration != nil, close: closeFeel, choose: { assisted in
+                    model.setAssisted(assisted)
+                    closeFeel()
+                }, calibrate: openCalibration)
             case .calibration:
-                WristCalibrationView(hapticsEnabled: round.haptics, onSaved: model.applyCalibration)
+                WristCalibrationView(model: model, hapticsEnabled: round.haptics)
             }
         }
-        .alert("空气吉他", isPresented: Binding(get: { model.error != nil }, set: {
+        .alert("Wrist Guitar", isPresented: Binding(get: { model.error != nil }, set: {
             if !$0 { model.error = nil }
         })) {
             Button("知道了", role: .cancel) { model.error = nil }
@@ -182,188 +207,225 @@ struct WatchContentView: View {
         presentedSheet = .library
     }
 
+    private func openFeel(fromSettings: Bool) {
+        feelOpenedFromSettings = fromSettings
+        presentedSheet = .feel
+    }
+
+    private func closeFeel() {
+        presentedSheet = feelOpenedFromSettings ? .settings : nil
+    }
+
     private func openCalibration() {
         model.pause(reason: "校准后可继续演奏", notify: false)
         presentedSheet = .calibration
     }
 }
 
+private struct WristDownPlayer: View {
+    @EnvironmentObject private var model: PerformanceModel
+    @EnvironmentObject private var round: RhythmRound
+    let isChallenge: Bool
+
+    private var title: String {
+        if isChallenge && round.phase != .ready {
+            if round.source == .speaker { return "外放跟拍" }
+            if round.source == .taps { return "点拍挑战" }
+        }
+        return model.song?.title ?? (model.externalMusic ? "跟外部音乐" : "空场练习")
+    }
+
+    private var detail: String {
+        if isChallenge {
+            switch round.phase {
+            case .ready: return "准备挑战"
+            case .analyzing: return "正在听拍"
+            case .countdown: return "准备开始"
+            case .playing: return "抬腕继续计分"
+            case .paused: return model.isRunning ? "抬腕继续计分" : "已暂停"
+            case .finished: return "本轮完成"
+            }
+        }
+        if model.isStarting { return "正在准备" }
+        if model.isRunning { return model.automaticBacking && model.song != nil ? "伴奏播放中" : "弹奏中" }
+        return model.status
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            Label(isChallenge ? "节奏挑战" : "自由弹奏", systemImage: "guitars")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Text(title)
+                .font(.system(.headline, design: .rounded, weight: .semibold))
+                .lineLimit(2)
+            HStack {
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                if model.isRunning {
+                    Spacer(minLength: 2)
+                    Button { model.pause() } label: {
+                        Image(systemName: "pause")
+                            .frame(minWidth: 44, minHeight: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("暂停演奏")
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .padding(.horizontal, 14)
+        .background { Color.black.ignoresSafeArea() }
+    }
+}
+
 private struct PerformancePage: View {
     @EnvironmentObject private var model: PerformanceModel
     let isFrontmost: Bool
+    let showsCrownVolume: Bool
     let chooseSong: () -> Void
     let settings: () -> Void
+    let feel: () -> Void
     let challenge: () -> Void
 
+    @AppStorage("WristGuitar.didShowWristGuide") private var didShowWristGuide = false
+    @State private var showsGuide = false
+    @State private var showingOptions = false
+
+    private var active: Bool { isFrontmost && model.isRunning && !showingOptions }
+    private var showsChord: Bool { !model.usesSongPick && !model.usesRecordingControls }
+
     var body: some View {
-        GeometryReader { geometry in
-            let compact = geometry.size.height < 225
-            ScrollView {
-                VStack(spacing: compact ? 3 : 6) {
-                    HStack(spacing: 4) {
-                        Button(action: chooseSong) {
-                            HStack(spacing: 4) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(model.song?.title ?? (model.externalMusic ? "跟外部音乐" : "空场练习"))
-                                        .font(.system(size: 13, weight: .semibold)).lineLimit(1)
-                                    Text(model.status).font(.system(size: 11)).foregroundStyle(watchSilver).lineLimit(1)
-                                }
-                                Image(systemName: "chevron.down").font(.system(size: 9, weight: .semibold))
-                            }
-                            .frame(maxWidth: .infinity, minHeight: 34, alignment: .leading)
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain).accessibilityLabel("选歌，\(model.song?.title ?? (model.externalMusic ? "跟外部音乐" : "空场练习"))")
-                        .accessibilityValue(model.status)
-                        Button(action: settings) {
-                            Image(systemName: "ellipsis").font(.system(size: 18, weight: .semibold))
-                                .frame(width: 36, height: 36)
-                                .sessionGlass(in: Circle())
-                        }
-                        .buttonStyle(.plain).accessibilityLabel("更多演奏选项")
-                    }
-
-                    Button(action: model.audition) {
-                        VStack(spacing: compact ? 0 : 3) {
-                            Text(model.instrumentLabel)
-                                .font(.system(size: model.muted ? 43 : (compact ? 55 : 63), weight: .semibold, design: .rounded))
-                                .minimumScaleFactor(0.65).lineLimit(1)
-                                .frame(maxWidth: .infinity)
-                            WristStrings(energy: model.strength, rotation: model.wristTurn)
-                                .frame(height: compact ? 18 : 24)
-                                .padding(.horizontal, 15)
-                        }
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("\(model.instrumentLabel)，轻点演奏")
-                    .accessibilityValue("已拨弦 \(model.strumCount) 次")
-
-                    if let song = model.song, model.automaticBacking {
-                        ProgressView(value: min(model.elapsed, song.duration), total: max(1, song.duration))
-                            .tint(watchPearl).accessibilityLabel("伴奏进度")
-                    }
-                    Spacer(minLength: 0)
-                    HStack(spacing: 14) {
-                        transportButton("music.note.list", label: "打开曲库", action: chooseSong)
-                        Button {
-                            Task { await model.toggle() }
-                        } label: {
-                            Group {
-                                if model.isStarting { ProgressView().tint(.black) }
-                                else { Image(systemName: model.isRunning ? "pause.fill" : "play.fill")
-                                    .font(.system(size: 22, weight: .semibold)).offset(x: model.isRunning ? 0 : 2) }
-                            }
-                            .frame(width: compact ? 49 : 54, height: compact ? 49 : 54)
-                            .foregroundStyle(.black).background(watchPearl, in: Circle())
-                        }
-                        .buttonStyle(.plain).disabled(model.isStarting)
-                        .accessibilityLabel(model.isStarting ? "正在准备" : (model.isRunning ? "暂停演奏" : "开始演奏"))
-                        .handGestureShortcut(.primaryAction, isEnabled: isFrontmost && !model.isStarting)
-                        transportButton("backward.end.fill", label: "回到歌曲开头", action: model.rewind)
-                            .disabled(model.isStarting)
-                    }
-                    Button(action: challenge) {
-                        HStack(spacing: 5) {
-                            Image(systemName: "waveform.path")
-                            Text("节奏挑战")
-                            Image(systemName: "chevron.right").font(.system(size: 8, weight: .semibold))
-                        }
-                        .font(.system(size: 11, weight: .semibold))
-                        .frame(maxWidth: .infinity, minHeight: compact ? 24 : 29)
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding(.horizontal, 9).padding(.top, 1).padding(.bottom, 3)
-                .frame(minHeight: geometry.size.height)
-                .frame(maxWidth: .infinity)
+        RecordWatchFace(title: model.song?.title ?? (model.externalMusic ? "跟外部音乐" : "空场练习"),
+                        status: model.status, chord: showsChord ? model.instrumentLabel : nil,
+                        elapsed: model.elapsed, duration: model.automaticBacking ? model.song?.duration : nil,
+                        showsHint: showsGuide, running: model.isRunning, starting: model.isStarting,
+                        frontmost: isFrontmost && !showingOptions, strokeCount: model.strumCount,
+                        options: { showingOptions = true }, chooseSong: chooseSong,
+                        skip: { showsGuide = false }, audition: model.audition,
+                        toggle: { Task { await model.toggle() } }) {
+            if showsCrownVolume && !showingOptions {
+                CrownVolumeControl(volume: $model.masterVolume)
+                    .foregroundStyle(RecordWatchInk.secondary)
             }
-            .scrollIndicators(.hidden)
+        } strings: {
+            ZStack(alignment: .trailing) {
+                LiveRecordWatchString(playedCount: model.strumCount, active: active,
+                                      strength: model.lastPickStrength ?? 0.60)
+                if showsChord {
+                    WristMotionIndicator(rotation: model.wristTurn, strength: model.strength,
+                                         ink: RecordWatchInk.secondary)
+                        .frame(width: 32).padding(.trailing, 13)
+                }
+            }
         }
-        .background { SessionBackdrop(fileURL: model.song?.url) }
-        .foregroundStyle(watchPearl)
-    }
-
-    private func transportButton(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: symbol).font(.system(size: 16, weight: .medium))
-                .frame(width: 40, height: 44).contentShape(Rectangle())
+        .onChange(of: active, initial: true) { _, active in
+            if active && !didShowWristGuide {
+                didShowWristGuide = true
+                showsGuide = true
+            } else if !active {
+                showsGuide = false
+            }
         }
-        .buttonStyle(.plain).accessibilityLabel(label)
+        .onChange(of: model.strumCount) { old, new in
+            if new > old { showsGuide = false }
+        }
+        .confirmationDialog("演奏选项", isPresented: $showingOptions) {
+            Button("打开曲库", action: chooseSong)
+            Button("节奏挑战", action: challenge)
+            Button("演奏手感", action: feel).disabled(model.isStarting)
+            Button("回到歌曲开头", action: model.rewind).disabled(model.isStarting)
+            Button("更多设置", action: settings)
+            Button("取消", role: .cancel) {}
+        }
     }
 }
 
-struct PlayingFeelButton: View {
-    @EnvironmentObject private var model: PerformanceModel
-    @State private var choosing = false
-    var compact = false
+struct CrownVolumeControl: View {
+    @Binding var volume: Double
+    @FocusState private var hasCrownFocus: Bool
 
     var body: some View {
-        Button { choosing = true } label: {
-            HStack(spacing: 4) {
-                if !compact { Text("演奏手感"); Spacer(minLength: 2) }
-                Text(model.feelTitle)
-                Image(systemName: "chevron.up.chevron.down").font(.system(size: 8, weight: .medium))
-            }
-            .font(compact ? .system(size: 11, weight: .medium) : .caption)
-            .padding(.horizontal, compact ? 7 : 0).padding(.vertical, compact ? 4 : 0)
-            .background { if compact { Capsule().fill(watchSilver.opacity(0.15)) } }
+        VStack(spacing: 1) {
+            Image(systemName: volume == 0 ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                .font(.system(size: 11, weight: .semibold))
+            Text(volume, format: .percent.precision(.fractionLength(0)))
+                .font(.system(size: 10, weight: .medium)).monospacedDigit()
         }
-        .buttonStyle(.plain)
-        .disabled(model.isStarting)
-        .accessibilityLabel("演奏手感").accessibilityValue(model.feelTitle)
-        .sheet(isPresented: $choosing) {
-            NavigationStack {
-                List {
-                    option("轻松跟弹", detail: "轻挥就能跟上，和弦和尾音自动接好。", assisted: true)
-                    option("精准控弦", detail: "转腕选和弦，每次拨弦的时机与轻重由你掌控。", assisted: false)
-                }
-                .navigationTitle("演奏手感")
-            }
+        .frame(minWidth: 32, minHeight: 36)
+        .contentShape(Rectangle())
+        .focusable()
+        .focused($hasCrownFocus)
+        .digitalCrownRotation(detent: $volume, from: 0, through: 1, by: 0.05,
+                              sensitivity: .medium, isContinuous: false, isHapticFeedbackEnabled: false)
+        .onTapGesture { hasCrownFocus = true }
+        .task {
+            await Task.yield()
+            if !Task.isCancelled { hasCrownFocus = true }
         }
-    }
-
-    private func option(_ title: String, detail: String, assisted: Bool) -> some View {
-        Button {
-            model.setAssisted(assisted)
-            choosing = false
-        } label: {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title).font(.headline)
-                    Text(detail).font(.caption2).foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer(minLength: 2)
-                if model.assisted == assisted { Image(systemName: "checkmark") }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("总音量")
+        .accessibilityValue(Text(volume, format: .percent.precision(.fractionLength(0))))
+        .accessibilityAdjustableAction { direction in
+            switch direction {
+            case .increment: volume = min(1, volume + 0.05)
+            case .decrement: volume = max(0, volume - 0.05)
+            @unknown default: break
             }
         }
-        .accessibilityAddTraits(model.assisted == assisted ? .isSelected : [])
     }
 }
 
-/// The three strings bow with measured rotation speed; plucks add a brief ripple.
-struct WristStrings: View {
-    let energy: Double
+/// A restrained, explicitly labelled sensor indicator. Fixed brightness and a
+/// neutral dead zone keep it distinct from the strings' sound confirmation.
+struct WristMotionIndicator: View {
     let rotation: Double
+    var strength: Double = 0
+    var showsStrength = true
+    var ink = watchSilver
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    private var turn: Double {
+        guard rotation.isFinite, abs(rotation) >= 0.08 else { return 0 }
+        return min(1, max(-1, rotation))
+    }
+
+    private var intensity: Double {
+        guard showsStrength, strength.isFinite, strength >= 0.08 else { return 0 }
+        return min(1, max(0, strength))
+    }
+
+    private var strengthLabel: String {
+        if intensity == 0 && turn == 0 { return "静" }
+        return intensity >= 0.65 ? "强" : "轻"
+    }
+
     var body: some View {
-        Canvas { context, size in
-            let turn = min(1, max(-1, rotation))
-            for index in 0..<3 {
-                let baseline = size.height * (Double(index) + 1) / 4
-                var path = Path()
-                for step in 0...32 {
-                    let t = Double(step) / 32
-                    let bow = reduceMotion ? 0 : sin(t * .pi) * (turn * 5 + energy * sin(t * .pi * 3) * 2.2)
-                    let point = CGPoint(x: size.width * t, y: baseline - bow)
-                    if step == 0 { path.move(to: point) } else { path.addLine(to: point) }
+        VStack(spacing: 2) {
+            Text(showsStrength ? "动作" : "转腕").font(.system(size: 8, weight: .medium))
+            if reduceMotion {
+                Text(strengthLabel).font(.system(size: 8)).frame(width: 28, height: 4)
+            } else {
+                ZStack {
+                    Capsule().fill(ink.opacity(0.22)).frame(height: 2)
+                    if showsStrength {
+                        Capsule().fill(ink.opacity(0.45))
+                            .frame(width: 28 * intensity, height: 2)
+                    }
+                    Circle().fill(ink.opacity(0.65))
+                        .frame(width: 3 + intensity * 2, height: 3 + intensity * 2)
+                        .offset(x: turn * 11)
                 }
-                context.stroke(path, with: .color(watchPearl.opacity(0.40 + 0.55 * abs(turn))), lineWidth: index == 1 ? 1.4 : 1)
+                .frame(width: 28, height: 4)
             }
-        }.accessibilityHidden(true)
+        }
+        .foregroundStyle(ink)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(showsStrength ? "手腕动作，不表示已经拨弦" : "转腕动作，不表示已经拨弦")
+        .accessibilityValue(intensity == 0 && turn == 0 ? "静止" : (showsStrength ? "检测到动作，\(Int(intensity * 100))%" : "检测到转腕"))
     }
 }
 
@@ -440,22 +502,48 @@ private struct SongPage: View {
 
 private struct SettingsPage: View {
     let calibrate: () -> Void
+    let editFeel: () -> Void
+    @Binding var crownVolumeEnabled: Bool
     @EnvironmentObject private var model: PerformanceModel
     @EnvironmentObject private var round: RhythmRound
     var body: some View {
         NavigationStack {
             Form {
-                Section("声音与触感") {
+                Section {
                     Toggle("挑战提示音", isOn: $round.sounds)
+                        .accessibilityHint("跟自己的歌曲挑战时，只在开始前的倒数发声。")
                     Toggle("演奏振动", isOn: $round.haptics)
+                        .accessibilityHint("轻拨和重拨用两种触感回应。")
                     Toggle("鼓点轻震", isOn: $round.beatHaptics)
                         .disabled(!round.haptics)
                         .accessibilityHint("跟随伴奏的拍点轻震。节奏挑战中跟随目标拍。")
                     if round.haptics { Button("试一下振动") { round.touch(.click) } }
+                } header: {
+                    Text("声音与触感")
+                } footer: {
+                    Text("鼓点轻震会在手腕静止时提示节拍。想保留震感，可在手表控制中心开启静音模式。")
                 }
                 Section("演奏手感") {
-                    PlayingFeelButton()
-                    Button(model.calibration == nil ? "校准我的挥幅" : "重新校准挥幅", action: calibrate)
+                    Button(action: editFeel) {
+                        HStack {
+                            Text("演奏手感")
+                            Spacer(minLength: 2)
+                            Text(model.feelTitle)
+                            Image(systemName: "chevron.up.chevron.down").font(.caption2)
+                        }
+                    }
+                    .disabled(model.isStarting)
+                    Button(model.calibration == nil ? "校准轻重手感" : "重新校准手感", action: calibrate)
+                    Toggle("随演奏微调", isOn: $model.adaptiveDynamics)
+                        .accessibilityHint("根据这一轮已弹出的轻拨和重拨，逐渐微调琴声和触感。")
+                    if model.adaptiveDynamics {
+                        Text("轻重交替弹过一段后，手表会跟着你微调力度。")
+                            .font(.caption2).foregroundStyle(.secondary)
+                    }
+                    if model.assisted && !model.usesSongPick && !model.usesRecordingControls && round.phase == .ready {
+                        Toggle("一挥一小句", isOn: $model.addsAssistedReply)
+                            .accessibilityHint("自由弹奏时，轻挥弹分解和弦，利落挥动弹扫弦。关闭后每挥只扫一次。")
+                    }
                     if model.calibration == nil {
                         Picker("灵敏度", selection: $model.sensitivity) {
                             Text("低").tag(Sensitivity.low)
@@ -472,18 +560,32 @@ private struct SettingsPage: View {
                     Text("已拨弦 \(model.strumCount) 次").font(.caption).foregroundStyle(.secondary)
                 }
                 Section("声音平衡") {
-                    Text("吉他音量").font(.caption)
+                    Toggle("表冠调音量", isOn: $crownVolumeEnabled)
+                        .accessibilityHint("演奏和挑战倒数时，转动数码表冠调整总音量。")
+                    HStack {
+                        Text("总音量")
+                        Spacer()
+                        Text(model.masterVolume, format: .percent.precision(.fractionLength(0)))
+                            .monospacedDigit()
+                    }
+                    .font(.caption)
+                    Slider(value: $model.masterVolume, in: 0...1, step: 0.05)
+                        .accessibilityLabel("总音量")
+                    Text(model.usesRecordingControls ? "拨动强度" : "演奏音量").font(.caption)
                     Slider(value: $model.guitarVolume, in: 0...1)
-                        .accessibilityLabel("吉他音量")
-                    Text("伴奏音量").font(.caption)
+                        .accessibilityLabel(model.usesRecordingControls ? "拨动强度" : "演奏音量")
+                    Text(model.usesRecordingControls ? "歌曲音量" : "伴奏音量").font(.caption)
                     Slider(value: $model.backingVolume, in: 0...1)
-                        .accessibilityLabel("伴奏音量")
+                        .accessibilityLabel(model.usesRecordingControls ? "歌曲音量" : "伴奏音量")
                     if !model.route.isEmpty { Text(model.route).font(.caption2).foregroundStyle(watchPearl) }
                 }
                 Section("弹奏小贴士") {
-                    Text("内置练习随伴奏换和弦。其他本地歌用能辨认的和弦，听不清时弹闷音。跟外部音乐时用闷音扫弦，空场练习每四挥换和弦。")
+                    Text("跟自己的歌试试：在句尾轻挥两下，下一拍加重，再停手听原曲。")
+                    Text("跟外部音乐时可以用闷音打节奏，空场练习每四挥换和弦。")
                     Text("双指互点两下：开始或暂停。请在系统设置开启此手势。")
-                    Text("保持应用在前台；后台暂停。手指连续动作暂不支持。S10 充电时请使用耳机播放。")
+                    Text("想在放下手腕时看到歌名，可在手表「设置 › 显示与亮度 › 全天候显示 › 显示 App」中开启 Wrist Guitar。")
+                    Text("想让演奏页停留更久，可在「设置 › 通用 › 返回表盘 › Wrist Guitar」选择「自定义」，再选「1 小时后」。")
+                    Text("手指连续动作暂不支持。S10 充电时请使用耳机播放。")
                 }.font(.caption2)
             }
             .navigationTitle("更多")

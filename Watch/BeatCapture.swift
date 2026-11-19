@@ -13,7 +13,7 @@ final class BeatCapture: ObservableObject {
     @Published private(set) var isBusy = false
 
     private var cancelled = false
-    private var fileTask: Task<BeatEstimate, Error>?
+    private var fileTask: Task<FileRhythmGuide, Error>?
     private var cancelWait: (() -> Void)?
 
     func cancel() {
@@ -26,19 +26,32 @@ final class BeatCapture: ObservableObject {
     /// Streaming decode and beat analysis run off the main actor, using at most
     /// 24 seconds by default and a bounded 16-second detector window.
     func analyzeFile(at url: URL, maxSeconds: TimeInterval = 24, startingAt: TimeInterval = 0) async throws -> BeatEstimate {
+        let guide = try await scanFile(at: url, maxSeconds: maxSeconds, startingAt: startingAt, includeAccents: false)
+        guard let beat = guide.beat else { throw BeatCaptureError.noStableBeat }
+        return beat
+    }
+
+    /// Local recorded attacks and (when independently supported) periodic beats.
+    /// The short look-ahead stays within the detector's rolling 16-second window.
+    func analyzeFileRhythm(at url: URL, maxSeconds: TimeInterval = 14, startingAt: TimeInterval = 0) async throws -> FileRhythmGuide {
+        try await scanFile(at: url, maxSeconds: min(16, maxSeconds), startingAt: startingAt, includeAccents: true)
+    }
+
+    private func scanFile(at url: URL, maxSeconds: TimeInterval, startingAt: TimeInterval,
+                          includeAccents: Bool) async throws -> FileRhythmGuide {
         try begin()
         defer { finish() }
         guard url.isFileURL, startingAt.isFinite, startingAt >= 0 else { throw BeatCaptureError.invalidFile }
         let seconds = max(8, min(45, maxSeconds.isFinite ? maxSeconds : 24))
         let task = Task.detached(priority: .utility) {
-            try Self.decodeFile(url, seconds: seconds, startingAt: startingAt)
+            try Self.decodeFile(url, seconds: seconds, startingAt: startingAt, includeAccents: includeAccents)
         }
         fileTask = task
-        let estimate = try await withTaskCancellationHandler(operation: {
+        let guide = try await withTaskCancellationHandler(operation: {
             try await task.value
         }, onCancel: { task.cancel() })
         try checkCancellation()
-        return estimate
+        return guide
     }
 
     /// Listen to nearby phone SPEAKER audio for 8–12 seconds. referenceBeat is
@@ -222,7 +235,8 @@ final class BeatCapture: ObservableObject {
         ]
     }
 
-    nonisolated private static func decodeFile(_ url: URL, seconds: TimeInterval, startingAt start: TimeInterval) throws -> BeatEstimate {
+    nonisolated private static func decodeFile(_ url: URL, seconds: TimeInterval, startingAt start: TimeInterval,
+                                                includeAccents: Bool) throws -> FileRhythmGuide {
         try Task.checkCancellation()
         let file = try AVAudioFile(forReading: url, commonFormat: .pcmFormatFloat32, interleaved: false)
         let format = file.processingFormat
@@ -260,8 +274,9 @@ final class BeatCapture: ObservableObject {
         if let estimate = tracker.estimate(), best == nil || estimate.confidence > best!.confidence { best = estimate }
         guard sampleCount >= Int(rate * 4) else { throw BeatCaptureError.insufficientAudio }
         guard sqrt(energy / Double(sampleCount)) > 0.0005 else { throw BeatCaptureError.silentFile }
-        guard let estimate = best, estimate.isValid, estimate.confidence >= 0.35 else { throw BeatCaptureError.noStableBeat }
-        return estimate
+        let beat = best.flatMap { $0.isValid && $0.confidence >= RhythmGame.minimumConfidence ? $0 : nil }
+        return FileRhythmGuide(startTime: Double(first) / rate, endTime: Double(position) / rate,
+                               beat: beat, accents: includeAccents ? tracker.recordedAccents() : [])
     }
 }
 
@@ -414,9 +429,9 @@ enum BeatCaptureError: LocalizedError {
         case .insufficientAudio: return "可分析的音频太短，请换一段至少数秒的音乐。"
         case .silentFile: return "本地音频太安静，暂时无法估计节拍。"
         case .noStableBeat: return "没有找到稳定节拍，请换一段鼓点更清楚的音乐重试。"
-        case .notForeground: return "请保持空气吉他在手表前台，再开始听外放。"
+        case .notForeground: return "请保持 Wrist Guitar 在手表前台，再开始听外放。"
         case .missingUsageDescription: return "应用未配置麦克风用途说明，暂时不能听外放。"
-        case .microphoneDenied: return "没有麦克风权限。请在系统设置允许空气吉他访问麦克风后重试。"
+        case .microphoneDenied: return "没有麦克风权限。请在系统设置允许 Wrist Guitar 访问麦克风后重试。"
         case .inputUnavailable: return "当前没有可用的麦克风音频，请在手表真机上重试。"
         case .headsetInput: return "当前输入来自耳机。请断开耳机，让手表麦克风听手机外放。"
         case .unsupportedInput: return "当前麦克风音频格式或时间信息不可用，请重试。"

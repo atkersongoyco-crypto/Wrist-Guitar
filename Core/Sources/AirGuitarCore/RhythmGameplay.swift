@@ -18,6 +18,30 @@ public struct BeatEstimate: Equatable, Codable, Sendable {
     }
 }
 
+/// Timing evidence from a decoded section, in seconds from the start of the
+/// recording. Strong individual attacks can be useful even without a tempo lock.
+public struct FileRhythmGuide: Sendable {
+    public let startTime: TimeInterval
+    public let endTime: TimeInterval
+    public let beat: BeatEstimate?
+    public let accents: [TimeInterval]
+
+    public init(startTime: TimeInterval, endTime: TimeInterval, beat: BeatEstimate?, accents: [TimeInterval]) {
+        self.startTime = startTime
+        self.endTime = endTime
+        self.beat = beat
+        self.accents = accents.filter { $0.isFinite && $0 >= startTime && $0 < endTime }.sorted()
+    }
+
+    public func accentOffsets(after time: TimeInterval, within window: TimeInterval) -> [TimeInterval] {
+        guard time.isFinite, window.isFinite, window > 0, time >= startTime, time < endTime else { return [] }
+        return accents.compactMap { accent in
+            let offset = accent - time
+            return offset > 0 && offset <= window ? offset : nil
+        }
+    }
+}
+
 /// A foreground beat cue cursor, independent of scoring and gestures.
 /// Timestamps share the estimate's clock (file seconds or monotonic uptime).
 /// Reset on playback discontinuities. Starting/resuming always waits for a
@@ -140,13 +164,7 @@ public struct RhythmBeatTracker: Sendable {
         guard (0.005...0.04).contains(dt) else { return nil }
         // Large missing stretches are not equally spaced observations.
         guard zip(frames, frames.dropFirst()).allSatisfy({ $1.time - $0.time < dt * 2.5 }) else { return nil }
-        var flux = [Double](repeating: 0, count: frames.count)
-        var smooth = frames[0].energy
-        for index in 1..<frames.count {
-            let next = frames[index].energy * 0.65 + smooth * 0.35
-            flux[index] = max(0, next - smooth)
-            smooth = next
-        }
+        let flux = positiveEnergyFlux()
         let mean = flux.reduce(0, +) / Double(flux.count)
         let deviation = sqrt(flux.reduce(0) { $0 + ($1 - mean) * ($1 - mean) } / Double(flux.count))
         let threshold = max(0.00005, mean + deviation * 0.5)
@@ -211,6 +229,51 @@ public struct RhythmBeatTracker: Sendable {
         reference += ceil((frames[0].time - reference) / period) * period
         return BeatEstimate(bpm: bpm, referenceBeat: reference,
                             confidence: min(1, peak * agreement))
+    }
+
+    private func positiveEnergyFlux() -> [Double] {
+        var flux = [Double](repeating: 0, count: frames.count)
+        guard var smooth = frames.first?.energy else { return flux }
+        for index in 1..<frames.count {
+            let next = frames[index].energy * 0.65 + smooth * 0.35
+            flux[index] = max(0, next - smooth)
+            smooth = next
+        }
+        return flux
+    }
+
+    /// Select distinct rises in the measured energy envelope. An attack needs a
+    /// local peak and continued energy in the following frames, so an isolated
+    /// click, sustained tone, or a jump at the decode boundary isn't a target.
+    /// Unlike beat estimation this makes no assumption about regular spacing.
+    public func recordedAccents() -> [TimeInterval] {
+        guard frames.count >= 20 else { return [] }
+        let dt = observedDuration / Double(frames.count - 1)
+        guard (0.005...0.04).contains(dt),
+              zip(frames, frames.dropFirst()).allSatisfy({ $1.time - $0.time < dt * 2.5 }) else { return [] }
+        let flux = positiveEnergyFlux()
+        let positive = flux.filter { $0 > 0 }.sorted()
+        guard !positive.isEmpty else { return [] }
+        let threshold = max(0.0009, positive[positive.count * 2 / 3])
+        let history = max(3, Int((0.06 / dt).rounded()))
+        let hold = max(2, Int((0.035 / dt).rounded()))
+        guard frames.count > history + hold + 1 else { return [] }
+
+        var candidates: [(time: TimeInterval, strength: Double)] = []
+        for i in history..<(frames.count - hold) {
+            guard flux[i] >= threshold, flux[i] >= flux[i - 1], flux[i] > flux[i + 1] else { continue }
+            let before = frames[(i - history)..<i].reduce(0) { $0 + $1.energy } / Double(history)
+            let after = frames[(i + 1)...(i + hold)].reduce(0) { $0 + $1.energy } / Double(hold)
+            guard after >= max(0.002, before * 1.30),
+                  frames[i + 1].energy >= before + 0.0007 else { continue }
+            let candidate = (time: frames[i].time, strength: flux[i] * (after - before))
+            if let last = candidates.last, candidate.time - last.time < 0.18 {
+                if candidate.strength > last.strength { candidates[candidates.count - 1] = candidate }
+            } else {
+                candidates.append(candidate)
+            }
+        }
+        return candidates.map(\.time)
     }
 }
 

@@ -1,5 +1,14 @@
 import SwiftUI
 
+enum SessionPalette {
+    static let kleinBlue = Color(red: 0, green: 47 / 255.0, blue: 167 / 255.0)
+    static let sage = Color(red: 168 / 255.0, green: 184 / 255.0, blue: 154 / 255.0)
+
+    static func action(in scheme: ColorScheme) -> Color {
+        scheme == .dark ? sage : kleinBlue
+    }
+}
+
 extension View {
     func sessionGlass(in shape: some Shape) -> some View {
         modifier(ArtworkControlGlass(shape: shape))

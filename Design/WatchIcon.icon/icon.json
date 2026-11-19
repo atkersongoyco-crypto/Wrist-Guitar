@@ -1,17 +1,10 @@
 {
   "fill": {
-    "automatic-gradient": "srgb:0.018,0.026,0.050,1.000"
+    "solid": "srgb:0.004,0.035,0.314,1.000"
   },
   "groups": [
     {
-      "layers": [
-        {
-          "image-name": "GlassRim.svg",
-          "name": "断续折射外缘",
-          "glass": false
-        }
-      ],
-      "name": "黑玻璃",
+      "name": "群青吉他",
       "specular": false,
       "shadow": {
         "kind": "none",
@@ -20,16 +13,21 @@
       "translucency": {
         "enabled": false,
         "value": 0
-      }
-    },
-    {
+      },
       "layers": [
         {
-          "image-name": "PorcelainGuitar.svg",
-          "name": "白瓷吉他"
+          "image-name": "KleinSageGuitar.png",
+          "name": "群青吉他",
+          "glass": false,
+          "position": {
+            "scale": 0.97,
+            "translation-in-points": [
+              0,
+              0
+            ]
+          }
         }
-      ],
-      "name": "吉他"
+      ]
     }
   ],
   "supported-platforms": {

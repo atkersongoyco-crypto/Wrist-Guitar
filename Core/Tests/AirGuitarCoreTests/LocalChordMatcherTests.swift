@@ -77,6 +77,21 @@ final class LocalChordMatcherTests: XCTestCase {
         }
     }
 
+    func testLowBassCanGuideASingleNoteWithoutInventingATriad() {
+        for midi in [28, 31, 33, 35] {
+            let frequency = 440 * pow(2, Double(midi - 69) / 12)
+            let samples = (0..<2160).map { index -> Float in
+                let phase = 2 * Double.pi * frequency * Double(index) / 5500
+                return Float(0.20 * sin(phase) + 0.08 * sin(2 * phase))
+            }
+            let estimate = LocalChordMatcher.analyze(mono: samples, sampleRate: 5500)
+            XCTAssertNil(estimate.chord)
+            XCTAssertEqual(estimate.bass, midi % 12)
+        }
+        let silence = LocalChordMatcher.analyze(mono: Array(repeating: 0, count: 2160), sampleRate: 5500)
+        XCTAssertNil(silence.bass)
+    }
+
     func testChordVocabularyAndOriginalManualContract() throws {
         XCTAssertEqual(Chord.allCases.count, 24)
         XCTAssertEqual(Set(Chord.allCases.map(\.name)).count, 24)

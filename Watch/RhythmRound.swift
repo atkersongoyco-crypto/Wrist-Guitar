@@ -29,7 +29,7 @@ final class RhythmRound: ObservableObject {
         }
     }
     /// Independent automatic beat cues; haptics remains the master switch.
-    @Published var beatHaptics = UserDefaults.standard.object(forKey: "AirGuitar.beatHaptics") as? Bool ?? true {
+    @Published var beatHaptics = UserDefaults.standard.bool(forKey: "AirGuitar.beatHaptics") {
         didSet {
             UserDefaults.standard.set(beatHaptics, forKey: "AirGuitar.beatHaptics")
             if !beatHaptics { beatHapticsActive = false }
@@ -40,7 +40,7 @@ final class RhythmRound: ObservableObject {
     @Published private(set) var beatHapticsActive = false
     var beatHapticPreferenceDidChange: (() -> Void)?
     var willPlayBeatHaptic: (() -> Void)?
-    @Published var sounds = UserDefaults.standard.object(forKey: "AirGuitar.cues") as? Bool ?? true {
+    @Published var sounds = UserDefaults.standard.bool(forKey: "AirGuitar.cues") {
         didSet { UserDefaults.standard.set(sounds, forKey: "AirGuitar.cues") }
     }
     private var lastTouch = -Double.infinity
@@ -264,12 +264,20 @@ final class RhythmRound: ObservableObject {
         WKInterfaceDevice.current().play(.click)
     }
 
-    func touch(_ kind: WKHapticType) {
+    /// Keep the timing cue when a free-play stroke and a beat would overlap.
+    /// A stroke in the gap can still have its own light or accented feedback.
+    func touchStroke(strength: Double, untilNextBeat: TimeInterval? = nil,
+                     beforePlaying: ((WKHapticType) -> Void)? = nil) {
+        if beatHapticsActive, let untilNextBeat, untilNextBeat < 0.18 { return }
+        touch(strength >= SongPickVoice.accentThreshold ? .directionUp : .click, beforePlaying: beforePlaying)
+    }
+
+    func touch(_ kind: WKHapticType, beforePlaying: ((WKHapticType) -> Void)? = nil) {
         let now = ProcessInfo.processInfo.systemUptime
         guard haptics, WKApplication.shared().applicationState == .active,
               now - lastTouch >= 0.18 else { return }
         lastTouch = now
-        willPlayHaptic?(kind)
+        (beforePlaying ?? willPlayHaptic)?(kind)
         WKInterfaceDevice.current().play(kind)
     }
 }

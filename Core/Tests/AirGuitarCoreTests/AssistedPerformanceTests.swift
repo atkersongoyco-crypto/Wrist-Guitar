@@ -3,6 +3,98 @@ import XCTest
 @testable import AirGuitarCore
 
 final class AssistedPerformanceTests: XCTestCase {
+    func testListeningGestureChangesArticulationWhileKeepingTheImmediateFirstAttack() {
+        var player = AssistedPerformance()
+        let accents = [0.38, 0.92]
+        let soft = player.listeningPhrase(at: 62, velocity: 0.50, source: .detected(.c),
+                                          accentOffsets: accents)
+        let firm = player.listeningPhrase(at: 64, velocity: 0.84, source: .detected(.c),
+                                          accentOffsets: accents)
+        XCTAssertTrue(soft.isArpeggio)
+        XCTAssertEqual(soft.hits.map(\.offset), [0, 0.38, 0.92])
+        XCTAssertEqual(soft.hits.map(\.voice), [.picked(60), .picked(64), .picked(67)])
+        XCTAssertFalse(firm.isArpeggio)
+        XCTAssertEqual(firm.hits.map(\.offset), [0, 0.92])
+        XCTAssertEqual(firm.hits.first?.voice, .strum(.c))
+        XCTAssertLessThan(soft.hits[2].gain, soft.hits[1].gain)
+        XCTAssertLessThan(soft.hits[1].gain, soft.hits[0].gain)
+        XCTAssertLessThan(soft.hits[0].gain, firm.hits[0].gain)
+        XCTAssertFalse(soft.secondaryIsBeatAligned)
+    }
+
+    func testListeningNotesRespectLaterHarmonyAndUncertainHarmonyLeavesRest() {
+        var player = AssistedPerformance()
+        let changed = player.listeningPhrase(at: 12, velocity: 0.48, source: .detected(.c),
+                                             accentOffsets: [0.32, 0.77]) { offset in
+            offset < 0.5 ? .aMinor : .f
+        }
+        XCTAssertEqual(changed.hits.map(\.voice), [.picked(60), .picked(64), .picked(65)])
+        let uncertain = player.listeningPhrase(at: 14, velocity: 0.48, source: .detected(.c),
+                                               accentOffsets: [0.32, 0.77]) { offset in
+            offset < 0.5 ? nil : .fSharpMinor
+        }
+        XCTAssertEqual(uncertain.hits.map(\.voice), [.picked(60), .picked(61)])
+        XCTAssertEqual(uncertain.hits.map(\.offset), [0, 0.77])
+        let firm = player.listeningPhrase(at: 15, velocity: 0.86, source: .detected(.d),
+                                          accentOffsets: [0.35, 0.65]) { $0 < 0.5 ? .d : nil }
+        XCTAssertEqual(firm.hits.map(\.offset), [0, 0.35])
+        let muted = player.listeningPhrase(at: 16, velocity: 0.48, source: .unpitched,
+                                           accentOffsets: [0.32, 0.77])
+        XCTAssertEqual(muted.hits.map(\.voice), [.mutedStrum])
+    }
+
+    func testListeningRespondsToTrustedSubdivisionsOrOneRubatoClosingString() {
+        let beat = BeatEstimate(bpm: 100, referenceBeat: 10, confidence: 0.9)
+        var player = AssistedPerformance()
+        let soft = player.listeningPhrase(at: 10, velocity: 0.48, source: .detected(.g), beat: beat)
+        XCTAssertTrue(soft.secondaryIsBeatAligned)
+        XCTAssertEqual(soft.hits[1].offset, 0.30, accuracy: 0.00001)
+        XCTAssertEqual(soft.hits[2].offset, 0.60, accuracy: 0.00001)
+        let offBeat = player.listeningPhrase(at: 10.3, velocity: 0.75, source: .detected(.g), beat: beat)
+        XCTAssertEqual(offBeat.hits.first?.voice, .upstroke(.g))
+        player.reset()
+        let initial = player.listeningPhrase(at: 10, velocity: 0.52, source: .detected(.g))
+        let rubato = player.listeningPhrase(at: 11.32, velocity: 0.52, source: .detected(.g),
+                                            beat: BeatEstimate(bpm: 96, referenceBeat: 10, confidence: 0.02))
+        XCTAssertEqual(initial.hits.count, 2)
+        XCTAssertFalse(rubato.secondaryIsBeatAligned)
+        XCTAssertEqual(rubato.hits.count, 2)
+        XCTAssertEqual(rubato.hits[1].offset, 0.66, accuracy: 0.00001)
+        XCTAssertNotEqual(initial.hits[1].offset, rubato.hits[1].offset)
+    }
+
+    func testListeningFiltersBunchedAccentsAndNeverAddsUnboundedNotes() {
+        var player = AssistedPerformance()
+        let phrase = player.listeningPhrase(at: 1, velocity: 0.52, source: .detected(.d),
+                                            accentOffsets: [.nan, -0.2, 0.02, 0.8, 0.4, 0.41, 2, 12, .infinity])
+        XCTAssertEqual(phrase.hits.map(\.offset), [0, 0.4, 0.8])
+        XCTAssertLessThanOrEqual(phrase.duration, 1.24 + 0.32 + 0.00001)
+        XCTAssertTrue(AssistedSoundRenderer.render(voice: .picked(Int.min)).isEmpty)
+    }
+
+    func testQuietBackingSoftensTheGuitarAndLoudBackingNeverBoostsIt() {
+        let quiet = AssistedPerformance.backingBlend(averagePowerDB: -40)
+        let verse = AssistedPerformance.backingBlend(averagePowerDB: -25)
+        XCTAssertEqual(quiet, pow(10, -6.0 / 20), accuracy: 0.000_001)
+        XCTAssertGreaterThan(verse, quiet)
+        XCTAssertLessThan(verse, 1)
+        XCTAssertEqual(AssistedPerformance.backingBlend(averagePowerDB: -10), 1)
+        XCTAssertEqual(AssistedPerformance.backingBlend(averagePowerDB: .nan), 1)
+    }
+
+    func testDisablingReplyKeepsTheImmediateSweepAndChordProgression() {
+        var player = AssistedPerformance()
+        for index in 0..<5 {
+            let phrase = player.phrase(at: Double(index), velocity: 0.15, source: .freePlay,
+                                       includeReply: false)
+            XCTAssertEqual(phrase.hits.map(\.voice), [.strum(index < 4 ? .c : .aMinor)])
+            XCTAssertEqual(phrase.hits.first?.offset, 0)
+            XCTAssertFalse(phrase.secondaryIsBeatAligned)
+        }
+        let muted = player.phrase(at: 6, velocity: 0.2, source: .unpitched, includeReply: false)
+        XCTAssertEqual(muted.hits.map(\.voice), [.mutedStrum])
+    }
+
     func testOriginalScoreChangesOnlyAtKnownChordBoundariesAndLoops() {
         let cases: [(Double, Chord)] = [(0, .c), (2.499, .c), (2.5, .aMinor),
                                        (4.999, .aMinor), (5, .f), (7.5, .g),
@@ -53,7 +145,7 @@ final class AssistedPerformanceTests: XCTestCase {
                 let phrase = player.phrase(at: 500 + Double(index) * 0.07, velocity: 0, source: source)
                 XCTAssertEqual(phrase.hits.count, 2)
                 XCTAssertEqual(phrase.hits[0].offset, 0)
-                XCTAssertGreaterThanOrEqual(phrase.hits[0].gain, 0.72)
+                XCTAssertEqual(phrase.hits[0].gain, 0.48, accuracy: 0.000_001)
                 XCTAssertLessThan(phrase.hits[1].gain, phrase.hits[0].gain * 0.4)
                 XCTAssertTrue((0.15...0.40).contains(phrase.hits[1].offset))
                 XCTAssertLessThanOrEqual(phrase.duration, 0.48 + 0.000_001)
@@ -91,7 +183,7 @@ final class AssistedPerformanceTests: XCTestCase {
     }
 
     func testBankIsDeterministicAudibleShortAndFinite() {
-        XCTAssertEqual(AssistedVoice.allVoices.count, 50)
+        XCTAssertEqual(AssistedVoice.allVoices.count, 90)
         for voice in AssistedVoice.allVoices {
             let samples = AssistedSoundRenderer.render(voice: voice, sampleRate: 16_000)
             XCTAssertEqual(samples.count, Int(16_000 * voice.duration))
@@ -140,10 +232,11 @@ final class AssistedPerformanceTests: XCTestCase {
     }
 
     func testExpandedBankIsBoundedAndNewChordRepliesStayInTheirTriad() {
-        XCTAssertEqual(Set(AssistedVoice.allVoices).count, 50)
+        XCTAssertEqual(Set(AssistedVoice.allVoices).count, 90)
         var bytes = 0
         for voice in AssistedVoice.allVoices {
-            bytes += AssistedSoundRenderer.render(voice: voice).count * MemoryLayout<Float>.size
+            let samples = AssistedSoundRenderer.render(voice: voice, sampleRate: AssistedSoundRenderer.watchSampleRate)
+            bytes += samples.count * MemoryLayout<Float>.size
         }
         XCTAssertLessThan(bytes, 1_250_000, "Keep the complete short-voice bank small enough to prewarm.")
         for chord in Chord.allCases where !Chord.manualVoicings.contains(chord) {
@@ -164,7 +257,7 @@ final class AssistedPerformanceTests: XCTestCase {
         let head = AssistedSoundRenderer.render(voice: first.hits[0].voice, sampleRate: 16_000)
         let replacement = AssistedSoundRenderer.render(phrase: second, sampleRate: 16_000)
         var expected = [Float](repeating: 0, count: rendered.count)
-        for index in head.indices { expected[index] = head[index] * Float(first.hits[0].gain) }
+        for index in 0..<min(3_520, head.count) { expected[index] = head[index] * Float(first.hits[0].gain) }
         for index in replacement.indices { expected[3_520 + index] += replacement[index] }
         XCTAssertEqual(rendered, expected)
     }

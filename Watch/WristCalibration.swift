@@ -27,33 +27,45 @@ enum WristCalibrationStore {
 
 @MainActor
 final class WristCalibration: ObservableObject {
-    enum Phase { case intro, baseline, collecting, trial }
+    enum Phase { case intro, baseline, light, heavy, trial }
+    enum Audition { case preparing, ready, unavailable }
+
     @Published private(set) var phase: Phase = .intro
     @Published private(set) var completedSwings = 0
     @Published private(set) var trialCount = 0
+    @Published private(set) var lastPickStrength: Double?
     @Published private(set) var telemetry = MotionTelemetry.idle
-    @Published private(set) var feedback = "用三次舒服的自然挥动，找到你的挥幅。"
-    @Published private(set) var candidate: MotionCalibrationProfile?
-    let hapticsEnabled: Bool
-    let savedProfile: MotionCalibrationProfile?
+    @Published private(set) var feedback = ""
+    @Published private(set) var audition: Audition = .preparing
+    @Published private(set) var auditionHint: String?
+    let savedProfile = WristCalibrationStore.load()
+    private let model: PerformanceModel
     private let driver = MotionDriver()
+    private var candidate: MotionCalibrationProfile?
     private var runID = UUID()
+    private var auditionTask: Task<Void, Never>?
+    private var ownsAudition = false
     private var lastAnnouncement = ""
+    private var recordedTotal = 0
 
-    init(hapticsEnabled: Bool) {
-        self.hapticsEnabled = hapticsEnabled
-        savedProfile = WristCalibrationStore.load()
+    init(model: PerformanceModel) {
+        self.model = model
     }
 
     func start() {
         stop()
-        phase = .baseline; completedSwings = 0; trialCount = 0; candidate = nil
+        phase = .baseline
+        completedSwings = 0
+        recordedTotal = 0
+        trialCount = 0
+        lastPickStrength = nil
+        candidate = nil
         telemetry = .idle
-        feedback = "先放松手腕，静止片刻。"
+        feedback = "手腕放松，静止一小会儿。"
         announce(feedback)
-        let id = UUID(); runID = id
+        let id = runID
         driver.startCalibration(update: { [weak self] update in
-            guard let self, self.runID == id, self.phase != .trial, self.phase != .intro else { return }
+            guard let self, self.runID == id else { return }
             self.apply(update)
         }, failure: { [weak self] message in
             guard let self, self.runID == id else { return }
@@ -63,34 +75,48 @@ final class WristCalibration: ObservableObject {
 
     private func apply(_ update: WristLearningUpdate) {
         telemetry = update.telemetry
-        let previous = completedSwings
-        completedSwings = update.completedSwings
-        phase = update.stage == .baseline ? .baseline : .collecting
-        switch update.feedback {
-        case .holdStill: feedback = "先放松手腕，静止片刻。"
-        case .moveComfortably: feedback = "自然挥一下，再放松；不用刻意加大力气。"
-        case .relaxBetween: feedback = "这一挥后放松片刻，再做下一次。"
-        case .tooSmall: feedback = "这次幅度还不够清楚，稍微动大一点再试。"
-        case .recorded: feedback = "已记住第 \(completedSwings) 次 · 放松一下"
-        case .complete: feedback = "三次已记住，接下来试挥。"
+        if let profile = update.candidate, profile.isValid {
+            beginTrial(profile)
+            return
         }
-        if completedSwings > previous { touch(.click) }
+        switch update.stage {
+        case .baseline: phase = .baseline
+        case .collecting: phase = .light
+        case .collectingAccents: phase = .heavy
+        case .completed: return
+        }
+        if update.completedSwings > recordedTotal, model.round.haptics,
+           WKApplication.shared().applicationState == .active {
+            driver.suppressGestures(for: 0.30)
+            model.round.touch(.click)
+        }
+        recordedTotal = update.completedSwings
+        completedSwings = max(0, update.completedSwings - (phase == .heavy ? 3 : 0))
+        switch update.feedback {
+        case .holdStill: feedback = "手腕放松，静止一小会儿。"
+        case .moveComfortably, .complete:
+            feedback = phase == .heavy ? "用舒服的大幅度挥一下，再放松。" : "像轻轻拨一下弦，挥完就放松。"
+        case .relaxBetween: feedback = "挥完放松，等这一挥记下来。"
+        case .tooSmall: feedback = "再稍微挥大一些，让手表看清这一下。"
+        case .recorded:
+            feedback = completedSwings == 0 ? "接下来试一试舒服的大幅度。" : "记住了，再来一下。"
+        case .needsMoreContrast: feedback = "轻重幅度太接近。保留轻挥，请把这组三次挥得稍大些。"
+        }
         announce(feedback)
-        if let profile = update.candidate, profile.isValid { beginTrial(profile) }
     }
 
     private func beginTrial(_ profile: MotionCalibrationProfile) {
-        candidate = profile; phase = .trial; trialCount = 0
-        feedback = "先放松一下，再按舒服的幅度试挥。"
+        candidate = profile
+        phase = .trial
+        runID = UUID()
+        let id = runID
+        feedback = "交替试试轻拨和重拨。"
         announce(feedback)
-        let id = UUID(); runID = id
-        driver.start(sensitivity: .high, assisted: true, calibration: profile,
-                     state: { _, _ in }, strum: { [weak self] _ in
+        prepareAudition()
+        driver.start(sensitivity: model.sensitivity, assisted: model.assisted, calibration: profile,
+                     allowsWristReversals: model.usesSongPick, state: { _, _ in }, strum: { [weak self] event in
             guard let self, self.runID == id, self.phase == .trial else { return }
-            self.trialCount += 1
-            self.feedback = "接住了 · 已试挥 \(self.trialCount) 次"
-            self.announce(self.feedback)
-            self.touch(.click)
+            self.preview(event)
         }, failure: { [weak self] message in
             guard let self, self.runID == id else { return }
             self.fail(message)
@@ -98,13 +124,56 @@ final class WristCalibration: ObservableObject {
             guard let self, self.runID == id, self.phase == .trial else { return }
             self.telemetry = value
         })
-        // A progress click may still be vibrating while the new detector starts.
-        driver.suppressGestures(for: 0.55)
+    }
+
+    func prepareAudition() {
+        guard phase == .trial else { return }
+        let id = runID
+        audition = .preparing
+        auditionHint = "正在准备琴声…"
+        ownsAudition = true
+        auditionTask?.cancel()
+        auditionTask = Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.model.beginCalibrationAudition()
+                guard !Task.isCancelled, self.runID == id else { return }
+                self.audition = .ready
+                self.auditionHint = self.model.guitarVolume == 0 ? "演奏音量为零，可在「更多」中调整。" : nil
+            } catch {
+                guard !Task.isCancelled, self.runID == id else { return }
+                self.audition = .unavailable
+                self.auditionHint = self.model.guitarVolume == 0
+                    ? "演奏音量为零。仍可看力度并保存。"
+                    : "试听声音暂不可用。仍可看力度并保存。"
+            }
+        }
+    }
+
+    private func preview(_ event: StrumEvent) {
+        guard audition != .preparing, WKApplication.shared().applicationState == .active else { return }
+        trialCount += 1
+        let previous = lastPickStrength
+        lastPickStrength = event.pickStrength
+        if audition == .ready {
+            let played = model.playCalibrationStroke(event, onHaptic: { [weak self] kind in
+                self?.driver.prepareForBeatHaptic(window: kind == .click ? 0.12 : 0.18)
+            })
+            if !played && model.guitarVolume > 0 {
+                audition = .unavailable
+                auditionHint = "试听中断。可重新打开声音，或先保存手感。"
+            }
+        }
+        let isHeavy = event.pickStrength >= SongPickVoice.accentThreshold
+        if previous.map({ $0 >= SongPickVoice.accentThreshold }) != isHeavy {
+            announce(isHeavy ? "重拨" : "轻拨")
+        }
     }
 
     func save() -> MotionCalibrationProfile? {
-        guard trialCount > 0, let candidate, WristCalibrationStore.save(candidate) else {
-            feedback = "先试挥成功一次，再保存；保存失败时请重试。"
+        guard phase == .trial, trialCount > 0, let candidate else { return nil }
+        guard WristCalibrationStore.save(candidate) else {
+            feedback = "保存失败，请再试一次。"
             announce(feedback)
             return nil
         }
@@ -112,24 +181,29 @@ final class WristCalibration: ObservableObject {
         return candidate
     }
 
-    func stop() { runID = UUID(); driver.stop() }
+    func stop() {
+        runID = UUID()
+        driver.stop()
+        auditionTask?.cancel()
+        auditionTask = nil
+        if ownsAudition {
+            ownsAudition = false
+            model.endCalibrationAudition()
+        }
+    }
 
     func interrupted() {
         guard phase != .intro else { return }
-        stop(); phase = .intro; candidate = nil; telemetry = .idle
-        feedback = "采集已停止，准备好后重新开始。"
-        announce(feedback)
+        fail("已暂停校准，准备好后重新开始。")
     }
 
     private func fail(_ message: String) {
-        stop(); phase = .intro; candidate = nil; telemetry = .idle
-        feedback = message; announce(message)
-    }
-
-    private func touch(_ kind: WKHapticType) {
-        guard hapticsEnabled, WKApplication.shared().applicationState == .active else { return }
-        driver.suppressGestures(for: 0.45)
-        WKInterfaceDevice.current().play(kind)
+        stop()
+        phase = .intro
+        telemetry = .idle
+        candidate = nil
+        feedback = message
+        announce(message)
     }
 
     private func announce(_ message: String) {
@@ -139,41 +213,43 @@ final class WristCalibration: ObservableObject {
     }
 }
 
-/// Present as a sheet only after pausing PerformanceModel. A cancelled sheet
-/// never modifies saved thresholds; a successful save/reset calls onSaved.
 @MainActor
 struct WristCalibrationView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var calibration: WristCalibration
     @State private var confirmReset = false
-    @State private var showingMotion = false
     private let onSaved: (MotionCalibrationProfile?) -> Void
+    private let hapticsEnabled: Bool
 
-    init(hapticsEnabled: Bool, onSaved: @escaping (MotionCalibrationProfile?) -> Void) {
-        _calibration = StateObject(wrappedValue: WristCalibration(hapticsEnabled: hapticsEnabled))
-        self.onSaved = onSaved
+    init(model: PerformanceModel, hapticsEnabled: Bool) {
+        _calibration = StateObject(wrappedValue: WristCalibration(model: model))
+        self.onSaved = model.applyCalibration
+        self.hapticsEnabled = hapticsEnabled
     }
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 13) {
-                    if calibration.phase == .intro { intro }
-                    else { activeCalibration }
-                    Text(calibration.hapticsEnabled ? "演奏振动已开启" : "演奏振动已关闭")
-                        .font(.system(size: 11)).foregroundStyle(watchSilver)
-                    if calibration.phase != .intro {
-                        Button("重新来三次", action: calibration.start)
-                            .font(.system(size: 12, weight: .medium))
-                            .buttonStyle(SessionSecondaryButtonStyle())
+            ScrollViewReader { reader in
+                ScrollView {
+                    VStack(spacing: 10) {
+                        if calibration.phase == .intro { intro }
+                        else if calibration.phase == .trial { trial }
+                        else { collecting }
+                        if calibration.phase != .intro {
+                            Button("重新校准", action: calibration.start)
+                                .buttonStyle(SessionSecondaryButtonStyle())
+                        }
+                        Button("取消") { calibration.stop(); dismiss() }
+                            .font(.caption).buttonStyle(.plain).frame(minHeight: 38)
                     }
-                    Button("取消") { calibration.stop(); dismiss() }
-                        .font(.system(size: 12)).frame(minHeight: 38).buttonStyle(.plain)
+                    .id("top")
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 8).padding(.bottom, 8)
                 }
-                .padding(.horizontal, 9).padding(.bottom, 12)
+                .onChange(of: calibration.phase) { _, _ in reader.scrollTo("top", anchor: .top) }
             }
-            .navigationTitle("个人挥幅")
+            .navigationTitle("手感校准")
             .background { SessionBackdrop(subdued: true) }
         }
         .tint(watchPearl)
@@ -182,112 +258,101 @@ struct WristCalibrationView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .background { calibration.interrupted() }
         }
-        .confirmationDialog("恢复默认挥幅？", isPresented: $confirmReset) {
+        .confirmationDialog("恢复默认手感？", isPresented: $confirmReset) {
             Button("恢复默认", role: .destructive) {
-                calibration.stop(); WristCalibrationStore.reset(); onSaved(nil); dismiss()
+                calibration.stop()
+                WristCalibrationStore.reset()
+                onSaved(nil)
+                dismiss()
             }
-            Button("保留个人挥幅", role: .cancel) {}
+            Button("保留个人手感", role: .cancel) {}
         } message: { Text("这会移除已保存的个人校准。") }
     }
 
     private var intro: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "hand.wave")
-                .font(.system(size: 30, weight: .light)).padding(.top, 5)
-                .accessibilityHidden(true)
-            Text("找到舒服的挥幅")
+        Group {
+            Image(systemName: "hand.wave").font(.system(size: 25, weight: .light)).accessibilityHidden(true)
+            Text("找到你的轻重手感")
                 .font(.system(size: 20, weight: .semibold, design: .rounded))
-                .multilineTextAlignment(.center)
-            Text("按平时的方式戴好手表。自然挥三次，每次之间放松一下。")
-                .font(.system(size: 12)).foregroundStyle(watchSilver)
-                .multilineTextAlignment(.center)
+            Text("先轻挥三次，再用舒服的大幅度挥三次。最后可以听着琴声试拨。")
+                .font(.caption).foregroundStyle(watchSilver)
             Button("开始校准", action: calibration.start)
-                .font(.system(size: 13, weight: .semibold))
                 .buttonStyle(SessionPrimaryButtonStyle())
-            Text(calibration.savedProfile == nil ? "保存后，两种弹奏模式都能用。" : "已有个人挥幅；保存新的校准后才会替换。")
-                .font(.system(size: 11)).foregroundStyle(watchSilver)
-                .multilineTextAlignment(.center)
-            if calibration.savedProfile != nil {
-                Button("恢复默认挥幅", role: .destructive) { confirmReset = true }
-                    .font(.system(size: 11)).frame(minHeight: 36)
-            }
             if !calibration.feedback.isEmpty {
-                Text(calibration.feedback).font(.system(size: 11)).foregroundStyle(watchSilver)
-                    .multilineTextAlignment(.center)
+                Text(calibration.feedback).font(.caption).foregroundStyle(watchPearl)
+            }
+            if calibration.savedProfile != nil {
+                Text("保存时会替换上次的手感。").font(.caption2).foregroundStyle(watchSilver)
+                Button("恢复默认手感", role: .destructive) { confirmReset = true }
+                    .font(.caption2)
             }
         }
     }
 
-    private var activeCalibration: some View {
+    private var collecting: some View {
         VStack(spacing: 12) {
-            Text(calibration.phase == .baseline ? "先放松手腕" : (calibration.phase == .trial ? "试挥看看" : "自然挥一下"))
+            Text(calibration.phase == .baseline ? "先静止片刻" : (calibration.phase == .light ? "轻轻挥三次" : "幅度大一些"))
                 .font(.system(size: 21, weight: .semibold, design: .rounded))
-            if calibration.phase == .trial {
-                Text("已接住 \(calibration.trialCount) 次")
-                    .font(.system(size: 13, weight: .medium)).monospacedDigit()
-                    .accessibilityLabel("已试挥成功 \(calibration.trialCount) 次")
-            } else {
-                HStack(spacing: 11) {
-                    ForEach(0..<3) { index in
-                        ZStack {
-                            Circle().fill(watchPearl.opacity(index < calibration.completedSwings ? 1 : 0.12))
-                            if index < calibration.completedSwings {
-                                Image(systemName: "checkmark").font(.system(size: 13, weight: .semibold)).foregroundStyle(.black)
-                            } else {
-                                Text("\(index + 1)").font(.system(size: 13, weight: .medium))
-                            }
-                        }.frame(width: 32, height: 32)
+            if calibration.phase != .baseline {
+                HStack(spacing: 9) {
+                    ForEach(0..<3) { i in
+                        Circle()
+                            .fill(watchPearl.opacity(i < calibration.completedSwings ? 1 : 0.18))
+                            .frame(width: 12, height: 12)
                     }
                 }
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("三次校准，已完成 \(calibration.completedSwings) 次")
+                .accessibilityLabel("已记录 \(calibration.completedSwings) 次，共三次")
             }
+            ProgressView(value: calibration.telemetry.strength)
+                .tint(watchSilver)
+                .accessibilityLabel("当前手腕动作")
+            Text(calibration.feedback).font(.caption).foregroundStyle(watchSilver)
+        }
+    }
 
-            WristStrings(energy: calibration.telemetry.strength, rotation: wristTurn)
-                .frame(height: 28).padding(.horizontal, 6)
-            Text(calibration.feedback)
-                .font(.system(size: 12, weight: .medium))
-                .multilineTextAlignment(.center)
-                .accessibilityLabel("校准提示，\(calibration.feedback)")
-
-            if calibration.phase == .trial {
-                Button("保存这个手感") {
-                    if let profile = calibration.save() { onSaved(profile); dismiss() }
+    private var trial: some View {
+        VStack(spacing: 8) {
+            let strength = calibration.lastPickStrength
+            let label = strength.map { $0 >= SongPickVoice.accentThreshold ? "重拨" : "轻拨" } ?? "试拨一下"
+            HStack(spacing: 12) {
+                Text(label).font(.system(size: 24, weight: .semibold, design: .rounded))
+                WristMotionIndicator(rotation: wristTurn, showsStrength: false)
+            }
+            ProgressView(value: strength ?? 0)
+                .tint(watchPearl)
+                .accessibilityLabel("上一次拨奏的力度")
+                .accessibilityValue("\(Int(((strength ?? 0) * 100).rounded()))%")
+            HStack {
+                Text("轻")
+                Spacer()
+                Text("重")
+            }.font(.caption2).foregroundStyle(watchSilver)
+            Text(calibration.feedback).font(.caption)
+            if calibration.trialCount > 0 {
+                Text("已试拨 \(calibration.trialCount) 次").font(.caption2).foregroundStyle(watchSilver)
+            }
+            if let hint = calibration.auditionHint {
+                Text(hint).font(.caption2).foregroundStyle(watchSilver)
+                if calibration.audition == .unavailable {
+                    Button("重试声音", action: calibration.prepareAudition)
+                        .font(.caption).buttonStyle(SessionSecondaryButtonStyle())
                 }
-                .font(.system(size: 13, weight: .semibold))
-                .buttonStyle(SessionPrimaryButtonStyle())
-                .disabled(calibration.trialCount == 0)
-                .opacity(calibration.trialCount == 0 ? 0.45 : 1)
-                Text("先试挥一次，满意再保存。两种弹奏模式都会使用这个挥幅。")
-                    .font(.system(size: 11)).foregroundStyle(watchSilver).multilineTextAlignment(.center)
             }
-
-            SessionDisclosure("动作反馈", isExpanded: $showingMotion) {
-                VStack(alignment: .leading, spacing: 7) {
-                    HStack {
-                        Text("手腕转动")
-                        Spacer(minLength: 2)
-                        Text(String(format: "%.2f rad/s", calibration.telemetry.gyroMagnitude)).monospacedDigit()
-                    }.font(.system(size: 11))
-                    ProgressView(value: calibration.telemetry.gyroStrength)
-                        .tint(watchPearl)
-                        .accessibilityLabel("陀螺仪转动强度")
-                        .accessibilityValue("\(Int(calibration.telemetry.gyroStrength * 100))%，每秒 \(String(format: "%.2f", calibration.telemetry.gyroMagnitude)) 弧度")
-                    HStack {
-                        Text("挥动力度")
-                        Spacer(minLength: 2)
-                        Text("\(Int(calibration.telemetry.strength * 100))%")
-                    }.font(.system(size: 11))
-                    ProgressView(value: calibration.telemetry.strength).accessibilityLabel("挥动用力反馈")
-                }.padding(.top, 7)
+            Button("保存手感") {
+                if let profile = calibration.save() { onSaved(profile); dismiss() }
             }
-            .font(.system(size: 11)).foregroundStyle(watchSilver)
+            .buttonStyle(SessionPrimaryButtonStyle())
+            .disabled(calibration.trialCount == 0)
+            Text(hapticsEnabled ? "演奏触感已开启" : "演奏触感已关闭")
+                .font(.caption2).foregroundStyle(watchSilver)
         }
     }
 
     private var wristTurn: Double {
-        let readings = [calibration.telemetry.gyroX, calibration.telemetry.gyroY, calibration.telemetry.gyroZ]
-        let strongest = readings.max(by: { abs($0) < abs($1) }) ?? 0
-        return min(1, max(-1, strongest / 2.5))
+        let motion = calibration.telemetry
+        let xy = abs(motion.gyroX) > abs(motion.gyroY) ? motion.gyroX : motion.gyroY
+        let axis = abs(xy) > abs(motion.gyroZ) ? xy : motion.gyroZ
+        return axis < 0 ? -motion.gyroStrength : motion.gyroStrength
     }
 }

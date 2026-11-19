@@ -1,0 +1,6 @@
+WristNylonFinger.wav and WristNylonPick.wav contain fingerstyle and plectrum recordings from Meta Nylon Guitar by Meta Creative Audio. The instrument recordings are dedicated to the public domain under CC0 1.0 Universal.
+
+https://github.com/facebookincubator/Meta-open-sound/tree/514c926efecdb3c7812bf00eedf8e5c8d61dd681/systems/instruments/meta-nylon-guitar
+https://creativecommons.org/publicdomain/zero/1.0/
+
+Each bank contains eleven notes (A2 through D#5 in minor thirds), from the Vel01Finger and Vel02Pick recording sets respectively. These recordings were trimmed, gain-matched, tuned, and converted to 22.05 kHz mono for Wrist Guitar.

@@ -34,19 +34,21 @@ final class MotionDriver {
     func start(sensitivity: Sensitivity,
                assisted: Bool = false,
                calibration: MotionCalibrationProfile? = nil,
+               allowsWristReversals: Bool = false,
                state: @escaping (Chord, Double) -> Void,
                strum: @escaping (StrumEvent) -> Void,
                failure: @escaping (String) -> Void,
                telemetry: ((MotionTelemetry) -> Void)? = nil) {
         startUpdates(prepare: { [weak self] in
             guard let self else { return }
-            self.interpreter = MotionInterpreter(sensitivity: sensitivity, assisted: assisted, calibration: calibration)
+            self.interpreter = MotionInterpreter(sensitivity: sensitivity, assisted: assisted, calibration: calibration,
+                                                allowsWristReversals: allowsWristReversals)
             self.needsCalibration = true
             self.lastUpdate = -.infinity
         }, consume: { [weak self] sample in
             guard let self else { return }
             if self.needsCalibration {
-                self.interpreter.calibrate(roll: sample.roll)
+                self.interpreter.prepareForSession()
                 self.needsCalibration = false
             }
             if let event = self.interpreter.consume(sample) { DispatchQueue.main.async { strum(event) } }
@@ -62,7 +64,7 @@ final class MotionDriver {
     func startCalibration(update: @escaping (WristLearningUpdate) -> Void,
                           failure: @escaping (String) -> Void) {
         startUpdates(prepare: { [weak self] in
-            self?.learner = WristMotionCalibrator()
+            self?.learner = WristMotionCalibrator(learnsDynamics: true)
             self?.lastLearning = nil
             self?.lastUpdate = -.infinity
         }, consume: { [weak self] sample in
@@ -119,12 +121,15 @@ final class MotionDriver {
     func setAssisted(_ assisted: Bool) {
         MotionCaptureSource.shared.control.async { self.interpreter.assisted = assisted }
     }
+    func setWristReversals(_ enabled: Bool) {
+        MotionCaptureSource.shared.control.async { self.interpreter.allowsWristReversals = enabled }
+    }
     func setCalibration(_ profile: MotionCalibrationProfile?) {
         MotionCaptureSource.shared.control.async { self.interpreter.calibration = profile?.isValid == true ? profile : nil }
     }
-    func prepareForBeatHaptic() {
+    func prepareForBeatHaptic(window: TimeInterval = 0.12) {
         let time = ProcessInfo.processInfo.systemUptime
-        MotionCaptureSource.shared.control.async { self.interpreter.expectBeatHaptic(at: time) }
+        MotionCaptureSource.shared.control.async { self.interpreter.expectBeatHaptic(at: time, window: window) }
     }
     func suppressGestures(for duration: TimeInterval) {
         guard duration.isFinite else { return }

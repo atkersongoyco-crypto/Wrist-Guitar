@@ -4,18 +4,22 @@ import Foundation
 /// Unknown, quiet or competing harmony returns nil rather than inventing a key.
 public enum LocalChordMatcher {
     public static func match(mono: [Float], sampleRate: Double) -> Chord? {
-        guard mono.count >= 512, mono.count <= 8192, (3000...12000).contains(sampleRate) else { return nil }
+        analyze(mono: mono, sampleRate: sampleRate).chord
+    }
+
+    /// A passage may have a clear pitched bass even when its full triad is ambiguous.
+    public static func analyze(mono: [Float], sampleRate: Double) -> (chord: Chord?, bass: Int?) {
+        guard mono.count >= 512, mono.count <= 8192, (3000...12000).contains(sampleRate) else { return (nil, nil) }
         var energy = 0.0
         let window = mono.enumerated().map { index, sample in
             let value = Double(sample)
             energy += value * value
             return value * (0.5 - 0.5 * cos(2 * .pi * Double(index) / Double(mono.count - 1)))
         }
-        guard energy.isFinite, energy / Double(mono.count) > 0.000008 else { return nil }
+        guard energy.isFinite, energy / Double(mono.count) > 0.000008 else { return (nil, nil) }
 
         let notes = 36...83
-        var amplitudes = [Double]()
-        for midi in notes {
+        func amplitude(at midi: Int) -> Double {
             let frequency = 440 * pow(2, Double(midi - 69) / 12)
             let coefficient = 2 * cos(2 * .pi * frequency / sampleRate)
             var a = 0.0
@@ -25,8 +29,9 @@ public enum LocalChordMatcher {
                 b = a
                 a = next
             }
-            amplitudes.append(sqrt(max(0, a * a + b * b - coefficient * a * b)))
+            return sqrt(max(0, a * a + b * b - coefficient * a * b))
         }
+        let amplitudes = notes.map { amplitude(at: $0) }
         var chroma = Array(repeating: 0.0, count: 12)
         var salience = [Double](repeating: 0, count: amplitudes.count)
         for index in amplitudes.indices {
@@ -43,7 +48,7 @@ public enum LocalChordMatcher {
             chroma[(notes.lowerBound + index) % 12] += salience[index]
         }
         let total = chroma.reduce(0, +)
-        guard total > 0 else { return nil }
+        guard total > 0 else { return (nil, nil) }
         chroma = chroma.map { $0 / total }
         var best = 0.0, second = 0.0
         var selected: Chord?
@@ -77,7 +82,26 @@ public enum LocalChordMatcher {
                 }
             }
         }
-        return best - second >= 0.085 ? selected : nil
+        // A standard bass guitar reaches E1. Ignoring the octave below the
+        // triad matcher often selects a vocal partial instead of the bass.
+        let lowest = 27
+        let bassSpectrum = (lowest..<notes.lowerBound).map { amplitude(at: $0) } + amplitudes
+        var lowChroma = Array(repeating: 0.0, count: 12)
+        for midi in 28...53 {
+            let i = midi - lowest
+            let neighbour = max(bassSpectrum[i - 1], bassSpectrum[i + 1])
+            var peak = max(0, bassSpectrum[i] - 0.78 * neighbour)
+            if i >= 12 { peak = max(0, peak - 0.40 * bassSpectrum[i - 12]) }
+            let overtone = max(bassSpectrum[i + 12], bassSpectrum[i + 19])
+            let support = min(1, overtone / max(peak, 1e-9))
+            lowChroma[midi % 12] += peak * (0.65 + 0.35 * support)
+        }
+        let ordered = lowChroma.indices.sorted { lowChroma[$0] > lowChroma[$1] }
+        let bass = ordered[0]
+        let isClearBass = lowChroma[bass] > 1.6 * lowChroma[ordered[1]]
+            && lowChroma[bass] > 0.31 * lowChroma.reduce(0, +)
+            && lowChroma[bass] > 0.055 * total
+        return (best - second >= 0.085 ? selected : nil, isClearBass ? bass : nil)
     }
 
 }

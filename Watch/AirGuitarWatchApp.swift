@@ -13,11 +13,16 @@ struct AirGuitarWatchApp: App {
                 .environmentObject(library)
                 .environmentObject(performance)
                 .environmentObject(performance.round)
-                .onChange(of: scenePhase) { _, phase in
-                    if phase == .background {
-                        performance.pause(reason: "回到前台后，点击继续")
-                    } else if phase == .active {
-                        performance.resumeBeatHapticsIfNeeded()
+                .onChange(of: scenePhase, initial: true) { _, phase in
+                    switch phase {
+                    case .active:
+                        performance.sceneDidBecomeActive()
+                    case .inactive:
+                        performance.sceneWillResignActive()
+                    case .background:
+                        performance.sceneDidEnterBackground()
+                    @unknown default:
+                        break
                     }
                 }
         }
