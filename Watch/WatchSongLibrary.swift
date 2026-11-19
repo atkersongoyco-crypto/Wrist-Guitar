@@ -38,6 +38,9 @@ struct WatchSong: Codable, Identifiable, Equatable {
 
 /// Persist received files before returning from WCSession's temporary-file callback.
 final class WatchSongLibrary: NSObject, ObservableObject, WCSessionDelegate {
+    let gameLink = WristGameLink { packet, reply, failed in
+        WCSession.default.sendMessage(packet, replyHandler: reply, errorHandler: failed)
+    }
     struct Preparation: Codable, Equatable {
         enum State: String, Codable { case waiting, ready, skipped }
         let request: SongPreparation
@@ -100,6 +103,7 @@ final class WatchSongLibrary: NSObject, ObservableObject, WCSessionDelegate {
         let request = SongPreparation(context: context)
         DispatchQueue.main.async {
             self.didCompleteActivation = true
+            self.gameLink.updateReachability(session.activationState == .activated && session.isReachable)
             if let error { self.message = error.localizedDescription }
             if let request { self.receive(request, isPractice: context["isPractice"] as? Bool == true) }
             else if activationState == .activated { self.reportPreparation() }
@@ -122,9 +126,17 @@ final class WatchSongLibrary: NSObject, ObservableObject, WCSessionDelegate {
         DispatchQueue.main.async { self.receive(request, isPractice: context["isPractice"] as? Bool == true) }
     }
 
+    func sessionReachabilityDidChange(_ session: WCSession) {
+        DispatchQueue.main.async { [weak self] in
+            self?.gameLink.updateReachability(session.activationState == .activated && session.isReachable)
+        }
+    }
+
     func session(_ session: WCSession, didReceiveMessage message: [String: Any],
                  replyHandler: @escaping ([String: Any]) -> Void) {
+        let receivedAt = WristGameLink.now
         DispatchQueue.main.async {
+            if self.gameLink.receive(message, receivedAt: receivedAt, reply: replyHandler) { return }
             let isPractice = message["isPractice"] as? Bool == true
             if let request = SongPreparation(context: message) {
                 self.acceptsImmediateReceipts = true

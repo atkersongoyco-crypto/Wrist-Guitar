@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f6f0">
+  <meta name="description" content="Wrist Guitar 是一款 iPhone 与 Apple Watch 配套的音乐应用。戴上手表自由跟弹，或把手机当成节奏赛道。">
+  <title>Wrist Guitar · 自由跟弹与体感音游</title>
+  <link rel="icon" href="media/icon.png" type="image/png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body id="top">
+  <a class="skip" href="#main">跳到正文</a>
+  <header class="header">
+    <div class="wrap mast">
+      <a class="brand" href="#top" aria-label="Wrist Guitar 首页"><img src="media/icon.png" width="36" height="36" alt=""><span>Wrist Guitar</span></a>
+      <nav aria-label="页面导航"><a href="#play">自由跟弹</a><a href="#rhythm">体感音游</a><a href="#start">开始使用</a></nav>
+    </div>
+  </header>
+  <main id="main">
+    <section class="hero" aria-labelledby="title">
+      <div class="wrap hero-inner">
+        <div class="intro">
+          <p class="platform">iPhone <span>+</span> Apple Watch</p>
+          <h1 id="title" lang="en">Wrist<br><em>Guitar</em></h1>
+          <p class="lead">把喜欢的歌，戴在手腕上。</p>
+          <p class="intro-copy">自由跟弹时，轻挥手腕给原曲加一点重音。打开体感音游，看音符落到蓝线，跟着音乐出手。</p>
+          <a class="button" href="#rhythm"><span class="play-icon" aria-hidden="true"></span>看音游演示</a>
+        </div>
+        <div class="disc-art" aria-hidden="true"><div class="record"><i class="hole"></i></div><div class="string"></div><div class="pin"></div></div>
+      </div>
+    </section>
+    <section id="play" class="free wrap" aria-labelledby="play-title">
+      <div class="section-head"><h2 id="play-title">自由跟弹</h2><p>原曲照常播放。挥腕时，手表带出录音里的伴奏细节，蓝弦回弹，停手后余音自然收住。</p></div>
+      <div class="gallery">
+        <figure class="library-card">
+          <div class="library-shot"><img src="media/library.webp" width="684" height="628" loading="lazy" alt="资料库的随手练习唱片封面，提示横划拨响第一声"></div>
+          <figcaption><span>iPhone · 资料库</span><p>从本地导入歌曲，也可以先在内置练习的唱片上横划试拨。</p></figcaption>
+        </figure>
+        <figure class="watch-card">
+          <div class="watch-shot"><div class="watch-body"><img src="media/watch-strum.webp" width="392" height="406" loading="lazy" alt="手表自由弹奏页面，蓝弦回弹后留下艾绿色余波"></div></div>
+          <figcaption><span>Apple Watch · 演奏</span><p>手表独立播放已送达的歌曲。个人挥幅可以校准，触感也可单独设置。</p></figcaption>
+        </figure>
+      </div>
+      <p class="caption">画面取自 App 的 SwiftUI 原生组件。</p>
+    </section>
+    <section id="rhythm" class="rhythm" aria-labelledby="rhythm-title">
+      <div class="wrap rhythm-inner">
+        <div class="game-copy">
+          <h2 id="rhythm-title">体感音游</h2>
+          <p class="game-lead">手机是赛道，<br>手表是手柄。</p>
+          <p>开局前选 iPhone 或 Apple Watch 出声。音符接近判定线时挥腕，每次有效挥动都有击弦声与动效，踩中拍点获得分数和连击。</p>
+          <dl class="facts">
+            <div><dt>谱面</dt><dd>按歌曲起音与局部节拍生成</dd></div>
+            <div><dt>操作</dt><dd>手表挥腕，或用 iPhone 点屏练习</dd></div>
+            <div><dt>纪录</dt><dd>按曲目版本和操作方式保存最佳成绩</dd></div>
+          </dl>
+        </div>
+        <figure class="video-figure">
+          <video controls playsinline preload="none" aria-label="体感音游带声预览，使用内置练习曲和模拟挥腕" poster="media/game-poster.webp" width="780" height="1112">
+            <source src="media/rhythm-preview.mp4" type="video/mp4">
+            <track kind="captions" srclang="zh" label="中文声音说明" src="data:text/vtt;charset=utf-8,WEBVTT%0A%0A00%3A00%3A00.000%20--%3E%2000%3A00%3A02.950%0A%E4%B8%89%E7%A7%92%E5%80%92%E6%95%B0%EF%BC%8C%E7%AD%89%E5%BE%85%E9%9F%B3%E4%B9%90%E5%BC%80%E5%A7%8B%E3%80%82%0A%0A00%3A00%3A03.000%20--%3E%2000%3A00%3A05.200%0A%E5%86%85%E7%BD%AE%E7%BB%83%E4%B9%A0%E6%9B%B2%E5%BC%80%E5%A7%8B%E3%80%82%E6%8C%A5%E8%85%95%E8%A7%A6%E5%8F%91%E5%87%BB%E5%BC%A6%E5%A3%B0%EF%BC%8C%E5%90%88%E6%8B%8D%E6%97%B6%E5%88%86%E6%95%B0%E5%A2%9E%E5%8A%A0%E3%80%82%0A%0A00%3A00%3A05.260%20--%3E%2000%3A00%3A07.300%0A%E6%89%8B%E8%85%95%E5%81%9C%E4%B8%8B%EF%BC%8C%E5%8E%9F%E6%9B%B2%E7%BB%A7%E7%BB%AD%E6%92%AD%E6%94%BE%E3%80%82%0A%0A00%3A00%3A07.370%20--%3E%2000%3A00%3A11.500%0A%E5%86%8D%E6%AC%A1%E6%8C%A5%E8%85%95%EF%BC%8C%E5%87%BB%E5%BC%A6%E5%A3%B0%E4%B8%8E%E7%90%B4%E5%BC%A6%E5%9B%9E%E5%BC%B9%E5%90%8C%E6%AD%A5%E3%80%82%0A">
+            <a href="media/rhythm-preview.mp4">打开 MP4 演示</a>
+          </video>
+          <figcaption>随手练习 · 11.5 秒 · 模拟挥腕</figcaption>
+        </figure>
+      </div>
+    </section>
+    <section id="start" class="wrap start" aria-labelledby="start-title">
+      <div class="section-head"><h2 id="start-title">开始使用</h2><p>准备好已配对的 iPhone 和 Apple Watch，两端安装同一版本的应用。可以直接从内置曲《随手练习》开始。</p></div>
+      <dl class="start-list">
+        <div><dt>导入音乐</dt><dd>在 iPhone 资料库选择「导入」，支持 MP3、M4A、WAV 和 AIFF，单个文件最多 100 MB。</dd></div>
+        <div><dt>选播放设备</dt><dd>自由跟弹在手表播放。体感音游可从手机或手表出声，选手表播放自己的歌时，请先点「用手表弹」，等到「手表已就绪」。</dd></div>
+        <div><dt>系统与安装</dt><dd>iOS 18 及以上，watchOS 11 及以上。用 Xcode 构建，或使用项目的未签名 IPA，签署手机 App 及内嵌的手表 App 后安装。</dd></div>
+      </dl>
+    </section>
+  </main>
+  <footer class="wrap footer"><a class="brand" href="#top"><img src="media/icon.png" width="28" height="28" alt="">Wrist Guitar</a><a href="#top">回到顶部 ↑</a></footer>
+</body>
+</html>

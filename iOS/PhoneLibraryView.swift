@@ -11,6 +11,7 @@ struct PhoneLibraryView: View {
     let onPracticeStroke: () -> Void
     @State private var showingImporter = false
     @State private var selectedSong: PhoneSong?
+    @State private var gameSong: PhoneSong?
     @State private var canRestoreAfterStroke = false
 
     private var practice: PhoneSong? { library.songs.first { $0.isPracticeTrack == true } }
@@ -25,6 +26,13 @@ struct PhoneLibraryView: View {
                             if practice != nil || showsPracticeGuide || canRestoreAfterStroke {
                                 practiceSection
                             }
+                            Button {
+                                if let song = library.songs.first ?? resolvePractice() { gameSong = song }
+                            } label: {
+                                Label("体感音游", systemImage: "waveform.path").font(.headline)
+                                    .foregroundStyle(.white).frame(maxWidth: .infinity, minHeight: 46)
+                                    .background(SessionPalette.kleinBlue, in: Capsule())
+                            }.buttonStyle(.plain)
                             songList
                             if let notice = library.notice {
                                 Text(notice).font(.footnote).foregroundStyle(.secondary)
@@ -44,6 +52,7 @@ struct PhoneLibraryView: View {
             .toolbar(.hidden, for: .navigationBar)
             .fileImporter(isPresented: $showingImporter, allowedContentTypes: [.audio],
                           allowsMultipleSelection: true, onCompletion: library.importFiles)
+            .fullScreenCover(item: $gameSong) { song in PhoneRhythmGame(library: library, song: song) }
             .sheet(item: $selectedSong) { song in
                 PhoneTrackDetail(library: library, songID: song.id)
                     .presentationDragIndicator(.visible)
@@ -367,6 +376,7 @@ private struct PhoneTrackDetail: View {
     @ObservedObject var library: PhoneLibrary
     @Environment(\.dynamicTypeSize) private var typeSize
     let songID: UUID
+    @State private var showingGame = false
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -376,6 +386,9 @@ private struct PhoneTrackDetail: View {
                 else { ContentUnavailableView("歌曲已移除", systemImage: "music.note") }
             }
             .background { LivelyLibraryCanvas().ignoresSafeArea() }
+            .fullScreenCover(isPresented: $showingGame) {
+                if let song = library.songs.first(where: { $0.id == songID }) { PhoneRhythmGame(library: library, song: song) }
+            }
             .navigationTitle("歌曲详情").navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -435,6 +448,12 @@ private struct PhoneTrackDetail: View {
                     }
                     .fixedSize(horizontal: true, vertical: false)
                 }
+                Button { showingGame = true } label: {
+                    Label("开始体感音游", systemImage: "waveform.path")
+                        .font(.headline).foregroundStyle(SessionPalette.action(in: scheme))
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .background { TransferStatusGlass(cornerRadius: 18) }
+                }.buttonStyle(.plain)
                 if song.backing != nil {
                     Picker("跟弹与试听版本", selection: Binding(get: { library.selectedVersion(for: song) },
                                                                set: { library.selectVersion($0, for: song) })) {

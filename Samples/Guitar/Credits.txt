@@ -4,3 +4,6 @@ https://github.com/facebookincubator/Meta-open-sound/tree/514c926efecdb3c7812bf0
 https://creativecommons.org/publicdomain/zero/1.0/
 
 Each bank contains eleven notes (A2 through D#5 in minor thirds), from the Vel01Finger and Vel02Pick recording sets respectively. These recordings were trimmed, gain-matched, tuned, and converted to 22.05 kHz mono for Wrist Guitar.
+
+GameStroke.wav combines damped finger attacks from the same CC0 recordings with a short synthesized guitar-body resonance.
+TourStroke.wav uses a short phrase made from the same CC0 finger recordings.

@@ -77,6 +77,9 @@ struct PhoneSong: Codable, Identifiable {
 /// UI calls and observable state live on the main queue. WCSession invokes delegates
 /// on a background queue; each callback explicitly returns to the main queue.
 final class PhoneLibrary: NSObject, ObservableObject, WCSessionDelegate, AVAudioPlayerDelegate {
+    let gameLink = WristGameLink { packet, reply, failed in
+        WCSession.default.sendMessage(packet, replyHandler: reply, errorHandler: failed)
+    }
     @Published private(set) var songs: [PhoneSong] = []
     @Published private(set) var connectionText = "正在连接手表…"
     @Published private(set) var canTransfer = false
@@ -823,6 +826,7 @@ final class PhoneLibrary: NSObject, ObservableObject, WCSessionDelegate, AVAudio
     private func refreshConnection() {
         guard let session else { canTransfer = false; return }
         canTransfer = session.activationState == .activated && session.isPaired && session.isWatchAppInstalled
+        gameLink.updateReachability(canTransfer && session.isReachable)
         if session.activationState != .activated { connectionText = "正在激活手表连接…" }
         else if !session.isPaired { connectionText = "请先配对 Apple Watch" }
         else if !session.isWatchAppInstalled { connectionText = "请在手表上安装 Wrist Guitar" }
@@ -872,7 +876,9 @@ final class PhoneLibrary: NSObject, ObservableObject, WCSessionDelegate, AVAudio
 
     func sessionReachabilityDidChange(_ session: WCSession) {
         DispatchQueue.main.async { [weak self] in
-            guard let self, session.isReachable else { return }
+            guard let self else { return }
+            self.refreshConnection()
+            guard session.isReachable else { return }
             if self.probingRevision == nil { self.lastProbedRevision = nil }
             self.retryWatchPreparation()
         }
@@ -924,7 +930,9 @@ final class PhoneLibrary: NSObject, ObservableObject, WCSessionDelegate, AVAudio
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any],
                  replyHandler: @escaping ([String: Any]) -> Void) {
+        let receivedAt = WristGameLink.now
         DispatchQueue.main.async { [weak self] in
+            if self?.gameLink.receive(message, receivedAt: receivedAt, reply: replyHandler) == true { return }
             self?.receiveReceipt(message)
             replyHandler(["received": true])
         }

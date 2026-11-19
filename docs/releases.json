@@ -1,0 +1,29 @@
+[
+  {
+    "version": "0.1.0",
+    "build": 1,
+    "snapshotDate": "2026-11-18",
+    "summary": "iPhone 导入原曲并传到手表，手表提供随手练习、自由弹奏和节奏挑战。",
+    "ipa": "Wrist-Guitar-0.1.0-unsigned.ipa",
+    "bytes": 10881093,
+    "sha256": "989f2a87b442d81ee725a18831739cd50a4e69385eb869f76a967fa2eb4e7557"
+  },
+  {
+    "version": "0.1.19",
+    "build": 20,
+    "snapshotDate": "2026-11-19",
+    "summary": "换上唱片式资料库与可试拨封面，手表显示蓝弦与艾绿色回弹。",
+    "ipa": "Wrist-Guitar-0.1.19-unsigned.ipa",
+    "bytes": 15881489,
+    "sha256": "0727d70afa6e85417cb5e0a0c653fe816914afde8eac9beff44eeb1834cfd5ec"
+  },
+  {
+    "version": "0.2.0",
+    "build": 21,
+    "snapshotDate": "2026-11-19",
+    "summary": "加入双端体感音游、手机或手表出声、按动作时间判分和本机个人纪录。",
+    "ipa": "Wrist-Guitar-0.2.0-unsigned.ipa",
+    "bytes": 16326534,
+    "sha256": "b5b141e8ed259508ccba38e428c48f796a0a8a4480d879ec2b9e5ff15aaba615"
+  }
+]

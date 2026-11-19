@@ -81,6 +81,7 @@ struct SessionDisclosure<Content: View>: View {
 }
 
 struct WatchContentView: View {
+    @EnvironmentObject private var game: WatchGameController
     @EnvironmentObject private var model: PerformanceModel
     @EnvironmentObject private var round: RhythmRound
     @EnvironmentObject private var library: WatchSongLibrary
@@ -105,7 +106,7 @@ struct WatchContentView: View {
     }
 
     private var pendingSelection: SongPreparation? {
-        guard scenePhase == .active, presentedSheet == nil, !model.isRunning, !model.isStarting,
+        guard !game.presented, scenePhase == .active, presentedSheet == nil, !model.isRunning, !model.isStarting,
               let preparation = library.preparation, preparation.state == .waiting,
               library.songs.contains(where: { $0.id == preparation.request.id }) else { return nil }
         switch round.phase {
@@ -125,15 +126,25 @@ struct WatchContentView: View {
     }
 
     var body: some View {
+        Group {
+            if game.presented { WatchGameScreen(game: game) }
+            else { playerPages }
+        }
+        .onChange(of: game.presented) { _, opened in
+            if opened { presentedSheet = nil; model.error = nil }
+        }
+    }
+
+    private var playerPages: some View {
         let wristDown = isLuminanceReduced && presentedSheet == nil
         let canAdjustVolume = crownVolumeEnabled && scenePhase == .active
             && !wristDown && presentedSheet == nil && model.error == nil
-        TabView(selection: $page) {
+        return TabView(selection: $page) {
             PerformancePage(isFrontmost: page == 0 && presentedSheet == nil && !wristDown && scenePhase == .active,
                             showsCrownVolume: canAdjustVolume && page == 0 && model.isRunning,
                             chooseSong: { openLibrary(forChallenge: false) },
                             settings: { presentedSheet = .settings }, feel: { openFeel(fromSettings: false) },
-                            challenge: { page = 1 }).tag(0)
+                            challenge: { page = 1 }, liveGame: game.open).tag(0)
             RhythmChallengePage(isFrontmost: page == 1 && presentedSheet == nil,
                                 showsCrownVolume: canAdjustVolume && page == 1 &&
                                     (round.phase == .countdown || round.phase == .playing),
@@ -290,6 +301,7 @@ private struct PerformancePage: View {
     let settings: () -> Void
     let feel: () -> Void
     let challenge: () -> Void
+    let liveGame: () -> Void
 
     @AppStorage("WristGuitar.didShowWristGuide") private var didShowWristGuide = false
     @State private var showsGuide = false
@@ -334,6 +346,7 @@ private struct PerformancePage: View {
             if new > old { showsGuide = false }
         }
         .confirmationDialog("演奏选项", isPresented: $showingOptions) {
+            Button("双端音游", action: liveGame)
             Button("打开曲库", action: chooseSong)
             Button("节奏挑战", action: challenge)
             Button("演奏手感", action: feel).disabled(model.isStarting)
